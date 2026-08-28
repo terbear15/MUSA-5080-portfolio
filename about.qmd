@@ -4,10 +4,7 @@ title: "About Me"
 
 ## Background
 
-<!-- CHANGE THIS -->
-
-Write a few paragraphs about yourself here: where you came from before MUSA,
-what drew you to urban spatial analytics, and what you're hoping to do with it.
+Hello, my name is Terry and I am a graduate Student in the MUSA program at Penn
 
 ## Skills
 
@@ -19,7 +16,5 @@ what drew you to urban spatial analytics, and what you're hoping to do with it.
 
 ## Contact
 
-<!-- CHANGE THIS -->
-
-- Email: your-email@upenn.edu
+- Email: terryxu@upenn.edu
 - GitHub: [@your-username](https://github.com/your-username)
