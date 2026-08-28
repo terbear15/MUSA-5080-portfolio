@@ -33,11 +33,9 @@ sessionInfo()$R.version$version.string
 
 ## Reflection
 
-<!-- CHANGE THIS: 3-4 sentences -->
+What I want out of this course: Get to know the basics of coding and try my best to implement that into my field of study (architecture and urban design)
 
-What I want out of this course:
-
-One thing I'm nervous about:
+One thing I'm nervous about: I have no experience in coding so I am extremelly nervous about the future courses. However, I am really excited to learn a lot.
 
 ## Questions I Still Have
 
