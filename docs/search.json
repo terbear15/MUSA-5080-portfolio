@@ -4,14 +4,14 @@
     "href": "index.html",
     "title": "Home",
     "section": "",
-    "text": "Welcome to my portfolio for MUSA 5080: Public Policy Analytics at the University of Pennsylvania.\nThis site documents my work in the Master of Urban Spatial Analytics program — weekly notes, course assignments, and a final project applying data analysis to urban policy questions.\n\n\n\nI’m a student in the MUSA program at Penn. My background is in [YOUR BACKGROUND], and I’m interested in [YOUR INTERESTS].\n\n\n\n\nWeekly Notes — what I’m learning each week\nAssignments — analyses completed for the course\nAbout — more background and how to reach me\n\n\n\n\n\n\nEmail: your-email@upenn.edu\nGitHub: @your-username"
+    "text": "Welcome to my portfolio for MUSA 5080: Public Policy Analytics at the University of Pennsylvania.\nThis site documents my work in the Master of Urban Spatial Analytics program — weekly notes, course assignments, and a final project applying data analysis to urban policy questions.\n\n\nI am a student in the Master of Urban Spatial Analytics (MUSA) program at the University of Pennsylvania with a background in architecture. I am interested in developing a comprehensive understanding of urban data science and its applications in cities.\n\n\n\n\nWeekly Notes — what I’m learning each week\nAssignments — analyses completed for the course\nAbout — more background and how to reach me\n\n\n\n\n\nEmail: your-email@upenn.edu\nGitHub: @terbear15"
   },
   {
     "objectID": "index.html#about-me",
     "href": "index.html#about-me",
     "title": "Home",
     "section": "",
-    "text": "I’m a student in the MUSA program at Penn. My background is in [YOUR BACKGROUND], and I’m interested in [YOUR INTERESTS]."
+    "text": "I am a student in the Master of Urban Spatial Analytics (MUSA) program at the University of Pennsylvania with a background in architecture. I am interested in developing a comprehensive understanding of urban data science and its applications in cities."
   },
   {
     "objectID": "index.html#what-youll-find-here",
@@ -25,7 +25,7 @@
     "href": "index.html#get-in-touch",
     "title": "Home",
     "section": "",
-    "text": "Email: your-email@upenn.edu\nGitHub: @your-username"
+    "text": "Email: your-email@upenn.edu\nGitHub: @terbear15"
   },
   {
     "objectID": "weekly-notes/week-01.html",
@@ -67,28 +67,28 @@
     "href": "weekly-notes/week-01.html#questions-i-still-have",
     "title": "Week 1: Getting Set Up",
     "section": "Questions I Still Have",
-    "text": "Questions I Still Have"
+    "text": "Questions I Still Have\n\nWhy do we need to push stuff to GitHub after rendering, is it for depository on cloud purposes?\nHow do I publish pdf and jpg files on my portfolio website?"
   },
   {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About Me",
     "section": "",
-    "text": "Hello, my name is Terry and I am a graduate Student in the MUSA program at Penn"
+    "text": "Master of Urban Spatial Analytics (MUSA) student at the University of Pennsylvania with a Bachelor’s degree in Architecture from Syracuse University. Experienced in architectural design, research, and digital representation, with an interdisciplinary perspective on the built environment. Skilled in developing design concepts, organizing research materials, and communicating ideas through drawings, models, and visual presentations. Detail-oriented and collaborative, I approach projects with creativity, precision, and a commitment to thoughtful design solutions."
   },
   {
     "objectID": "about.html#background",
     "href": "about.html#background",
     "title": "About Me",
     "section": "",
-    "text": "Hello, my name is Terry and I am a graduate Student in the MUSA program at Penn"
+    "text": "Master of Urban Spatial Analytics (MUSA) student at the University of Pennsylvania with a Bachelor’s degree in Architecture from Syracuse University. Experienced in architectural design, research, and digital representation, with an interdisciplinary perspective on the built environment. Skilled in developing design concepts, organizing research materials, and communicating ideas through drawings, models, and visual presentations. Detail-oriented and collaborative, I approach projects with creativity, precision, and a commitment to thoughtful design solutions."
   },
   {
     "objectID": "about.html#skills",
     "href": "about.html#skills",
     "title": "About Me",
     "section": "Skills",
-    "text": "Skills\n\n\nLanguages & Tools: R, Quarto, Git\nSpatial: (add as you learn)\nData: US Census / ACS via tidycensus"
+    "text": "Skills\n\nLanguages & Tools: R, Quarto, Git, Python, ArcGIS, Photoshop, Illustrator, Indesign, Rhino, Sketchup\nSpatial:\nData: US Census / ACS via tidycensus"
   },
   {
     "objectID": "about.html#contact",

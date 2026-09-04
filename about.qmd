@@ -4,14 +4,17 @@ title: "About Me"
 
 ## Background
 
-Hello, my name is Terry and I am a graduate Student in the MUSA program at Penn
+Master of Urban Spatial Analytics (MUSA) student at the University of Pennsylvania with a Bachelor’s
+degree in Architecture from Syracuse University. Experienced in architectural design, research, and digital
+representation, with an interdisciplinary perspective on the built environment. Skilled in developing design
+concepts, organizing research materials, and communicating ideas through drawings, models, and visual
+presentations. Detail-oriented and collaborative, I approach projects with creativity, precision, and a
+commitment to thoughtful design solutions.
 
 ## Skills
 
-<!-- CHANGE THIS: update this through the semester as it becomes true -->
-
-- **Languages & Tools:** R, Quarto, Git
-- **Spatial:** (add as you learn)
+- **Languages & Tools:** R, Quarto, Git, Python, ArcGIS, Photoshop, Illustrator, Indesign, Rhino, Sketchup
+- **Spatial:** 
 - **Data:** US Census / ACS via `tidycensus`
 
 ## Contact

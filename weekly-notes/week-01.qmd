@@ -39,5 +39,5 @@ One thing I'm nervous about: I have no experience in coding so I am extremelly n
 
 ## Questions I Still Have
 
--
--
+- Why do we need to push stuff to GitHub after rendering, is it for depository on cloud purposes?
+- How do I publish pdf and jpg files on my portfolio website?

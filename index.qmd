@@ -2,9 +2,8 @@
 title: "Home"
 ---
 
-# YOUR NAME HERE {#welcome}
+# Terry Boxuan Xu {#welcome}
 
-<!-- CHANGE THIS: replace with your own name above -->
 
 Welcome to my portfolio for **MUSA 5080: Public Policy Analytics** at the
 University of Pennsylvania.
@@ -15,10 +14,8 @@ urban policy questions.
 
 ## About Me
 
-<!-- CHANGE THIS: two or three sentences about yourself -->
 
-I'm a student in the MUSA program at Penn. My background is in
-[YOUR BACKGROUND], and I'm interested in [YOUR INTERESTS].
+I am a student in the Master of Urban Spatial Analytics (MUSA) program at the University of Pennsylvania with a background in architecture. I am interested in developing a comprehensive understanding of urban data science and its applications in cities.
 
 ## What You'll Find Here
 
@@ -28,7 +25,6 @@ I'm a student in the MUSA program at Penn. My background is in
 
 ## Get in Touch
 
-<!-- CHANGE THIS -->
 
 - Email: your-email@upenn.edu
-- GitHub: [@your-username](https://github.com/your-username)
+- GitHub: [@terbear15](https://github.com/terbear15)
