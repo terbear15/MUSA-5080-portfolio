@@ -1,16 +1,13 @@
 ---
-title: "Week 1: Getting Set Up"
-description: "First impressions, and getting the workflow running."
-date: 2026-08-28
+title: "Week 2: dplyr and Census"
+description: "Table Functions and ACS Data"
+date: 2026-09-04
 ---
 
 ## What We Did
 
-<!-- CHANGE THIS: replace with your own notes -->
 
-Set up the portfolio workflow: made a repository from a template, cloned it with
-GitHub Desktop, edited files in RStudio, rendered with Quarto, and published to
-GitHub Pages.
+First we had a quiz
 
 ## Key Concepts
 
@@ -39,5 +36,5 @@ One thing I'm nervous about: I have no experience in coding so I am extremelly n
 
 ## Questions I Still Have
 
-- Why do we need to push stuff to GitHub after rendering, is it for depository on cloud purposes?
-- How do I publish pdf and jpg files on my portfolio website?
+- 
+- 

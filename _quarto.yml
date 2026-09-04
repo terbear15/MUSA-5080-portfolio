@@ -23,7 +23,7 @@ website:
 
 format:
   html:
-    theme: sketchy
+    theme: lux
     toc: true
     code-fold: false
     code-tools: true
