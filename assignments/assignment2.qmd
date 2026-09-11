@@ -1,0 +1,158 @@
+---
+title: "Assignment 2: Who Do We Know the Least About?"
+subtitle: "Measuring uncertainty in American Community Survey data"
+author: "Terry Xu"
+date: 2026-09-10
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  warning: false
+  message: false
+---
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+```
+
+---
+
+## The question
+
+Every number the American Community Survey publishes is an estimate drawn from a
+sample, not a count. That means every number comes with a margin of error — a
+statement about how wrong it might be.
+
+Most people ignore it. In this assignment, you won't.
+
+**In this analysis, I look at the median gross rent across counties in North Carolina, and ask which communities are measured most and least reliably.**
+
+---
+
+## Choosing what to measure
+
+```{r}
+my_state <- "NC"        # two-letter abbreviation, in quotes
+my_variable <- "B25064_001"     # the variable code, in quotes
+```
+
+## Pulling the data
+
+```{r}
+county_data <- get_acs(
+  geography = "county",
+  variables = my_variable,
+  state = my_state,
+  year = 2023,
+  survey = "acs5"
+)
+```
+
+Let's look at what came back.
+
+```{r}
+dim(county_data)
+head(county_data)
+```
+
+
+**The dataset contains 100 rows, which matches the 100 counties in North Carolina State.**
+
+---
+
+## How big is the margin of error?
+
+A margin of error of 3,000 means something very different for an estimate of 20,000
+than for an estimate of 200,000. To compare across places, we need it as a
+percentage.
+
+```{r}
+county_data <- county_data %>%
+  mutate(moe_pct = moe / estimate * 100)
+```
+
+Now sort to see which counties are measured least reliably.
+
+```{r}
+county_data %>%
+  arrange(desc(moe_pct)) %>%
+  select(NAME, estimate, moe, moe_pct) %>%
+  head(10)
+```
+
+The county with the largest relative margin of error is Chowan County, with a margin of error equal to 37.9% of its estimated median gross rent.
+
+---
+
+## Sorting counties into reliability categories
+
+```{r}
+county_data <- county_data %>%
+  mutate(reliability = case_when(
+    moe_pct < 5  ~ "High confidence",
+    moe_pct < 10 ~ "Moderate",
+    TRUE         ~ "Low confidence"
+  ))
+
+count(county_data, reliability)
+```
+
+There are 51 high-confidence counties, 36 moderate-confidence counties, and 13 low-confidence counties.
+
+---
+
+## Is the margin of error bigger in small places?
+
+To answer this we need population and our variable side by side, in the same row.
+That means a **wide** pull.
+
+```{r}
+county_wide <- get_acs(
+  geography = "county",
+  variables = c(myvar = my_variable,
+                pop   = "B01003_001"),
+  state = my_state,
+  year = 2023,
+  survey = "acs5",
+  output = "wide"
+)
+
+head(county_wide)
+```
+
+```{r}
+county_wide <- county_wide %>%
+  mutate(moe_pct = myvarM / myvarE * 100) %>%
+  mutate(reliability = case_when(
+    moe_pct < 5  ~ "High confidence",
+    moe_pct < 15 ~ "Moderate",
+    TRUE         ~ "Low confidence"
+  ))
+```
+
+Now compare the average population of counties in each reliability category.
+
+```{r}
+county_wide %>%
+  group_by(reliability) %>%
+  summarize(
+    n_counties = n(),
+    avg_population = mean(popE)
+  )
+```
+
+High-confidence counties have an average population of about 173,508 people, while low-confidence counties average about 11,434 people. Moderate-confidence
+counties average about 40,097 people. This shows a clear pattern: smaller counties tend to have less reliable ACS median gross-rent estimates.
+
+Reflection:
+The ACS estimates of median gross rent are least reliable in several small North Carolina counties, especially Chowan, Gates, Graham, Hyde, Cherokee, Washington, and Tyrrell Counties. Chowan County has the largest relative margin of error: its estimated median gross rent is $766, with a margin of error of $290, or 37.9%. This means the published estimate has a large amount of uncertainty and should not be treated as a precise measure of what renters pay there. Gates and Graham Counties also have very high relative margins of error, at 22.8% and 21.5%, respectively.
+
+This pattern occurs because the ACS is based on a sample rather than a complete count of every household. Smaller counties have fewer households in the survey sample, so their estimates are less stable and have larger margins of error. In contrast, counties with larger populations generally have more survey responses and therefore more reliable estimates. My results show that 51 North Carolina counties have high-confidence estimates, while 13 counties fall into the low-confidence category.
+
+If a state agency allocated housing-assistance funding based only on these median-rent estimates, without considering their margins of error, it could make unfair decisions. Small counties with uncertain estimates could receive too little funding if their rent is underestimated, or funds could be directed inefficiently if rent is overestimated. Residents of rural counties, where housing data are already limited, would be most likely to be affected. Policymakers should therefore use ACS estimates together with their margins of error and avoid treating all county-level numbers as equally certain.
+
+---

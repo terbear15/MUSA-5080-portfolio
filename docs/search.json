@@ -116,7 +116,7 @@
     "href": "assignments/index.html",
     "title": "Assignments",
     "section": "",
-    "text": "Completed assignments for MUSA 5080. New assignments appear here automatically once you add the .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\nNo matching items"
+    "text": "Completed assignments for MUSA 5080. New assignments appear here automatically once you add the .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nAssignment 2: Who Do We Know the Least About?\n\n\n\n\n\n\n\n\nSep 10, 2026\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
@@ -144,7 +144,7 @@
     "href": "about.html#contact",
     "title": "About Me",
     "section": "Contact",
-    "text": "Contact\n\nEmail: terryxu@upenn.edu\nGitHub: @your-username"
+    "text": "Contact\n\nEmail: terryxu@upenn.edu\nGitHub: @terbear15"
   },
   {
     "objectID": "data/readme.html",
@@ -201,5 +201,61 @@
     "title": "Week 2: dplyr and Census",
     "section": "Questions I Still Have",
     "text": "Questions I Still Have\n\nWhen should I use long format versus wide format before beginning an analysis?\nHow can I use Census tract data while accounting for boundaries that change over time?"
+  },
+  {
+    "objectID": "assignments/assignment2.html",
+    "href": "assignments/assignment2.html",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "",
+    "text": "library(tidyverse)\nlibrary(tidycensus)"
+  },
+  {
+    "objectID": "assignments/assignment2.html#setup",
+    "href": "assignments/assignment2.html#setup",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "",
+    "text": "library(tidyverse)\nlibrary(tidycensus)"
+  },
+  {
+    "objectID": "assignments/assignment2.html#the-question",
+    "href": "assignments/assignment2.html#the-question",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "The question",
+    "text": "The question\nEvery number the American Community Survey publishes is an estimate drawn from a sample, not a count. That means every number comes with a margin of error — a statement about how wrong it might be.\nMost people ignore it. In this assignment, you won’t.\nIn this analysis, I look at the median gross rent across counties in North Carolina, and ask which communities are measured most and least reliably."
+  },
+  {
+    "objectID": "assignments/assignment2.html#choosing-what-to-measure",
+    "href": "assignments/assignment2.html#choosing-what-to-measure",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "Choosing what to measure",
+    "text": "Choosing what to measure\n\nmy_state &lt;- \"NC\"        # two-letter abbreviation, in quotes\nmy_variable &lt;- \"B25064_001\"     # the variable code, in quotes"
+  },
+  {
+    "objectID": "assignments/assignment2.html#pulling-the-data",
+    "href": "assignments/assignment2.html#pulling-the-data",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "Pulling the data",
+    "text": "Pulling the data\n\ncounty_data &lt;- get_acs(\n  geography = \"county\",\n  variables = my_variable,\n  state = my_state,\n  year = 2023,\n  survey = \"acs5\"\n)\n\nLet’s look at what came back.\n\ndim(county_data)\n\n[1] 100   5\n\nhead(county_data)\n\n# A tibble: 6 × 5\n  GEOID NAME                             variable   estimate   moe\n  &lt;chr&gt; &lt;chr&gt;                            &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;\n1 37001 Alamance County, North Carolina  B25064_001     1007    28\n2 37003 Alexander County, North Carolina B25064_001      745    36\n3 37005 Alleghany County, North Carolina B25064_001      755   114\n4 37007 Anson County, North Carolina     B25064_001      849    63\n5 37009 Ashe County, North Carolina      B25064_001      774    39\n6 37011 Avery County, North Carolina     B25064_001      791    68\n\n\nThe dataset contains 100 rows, which matches the 100 counties in North Carolina State."
+  },
+  {
+    "objectID": "assignments/assignment2.html#how-big-is-the-margin-of-error",
+    "href": "assignments/assignment2.html#how-big-is-the-margin-of-error",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "How big is the margin of error?",
+    "text": "How big is the margin of error?\nA margin of error of 3,000 means something very different for an estimate of 20,000 than for an estimate of 200,000. To compare across places, we need it as a percentage.\n\ncounty_data &lt;- county_data %&gt;%\n  mutate(moe_pct = moe / estimate * 100)\n\nNow sort to see which counties are measured least reliably.\n\ncounty_data %&gt;%\n  arrange(desc(moe_pct)) %&gt;%\n  select(NAME, estimate, moe, moe_pct) %&gt;%\n  head(10)\n\n# A tibble: 10 × 4\n   NAME                                estimate   moe moe_pct\n   &lt;chr&gt;                                  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;\n 1 Chowan County, North Carolina            766   290    37.9\n 2 Gates County, North Carolina             940   214    22.8\n 3 Graham County, North Carolina            581   125    21.5\n 4 Hyde County, North Carolina             1237   244    19.7\n 5 Cherokee County, North Carolina          800   151    18.9\n 6 Washington County, North Carolina        829   134    16.2\n 7 Tyrrell County, North Carolina           612    95    15.5\n 8 Alleghany County, North Carolina         755   114    15.1\n 9 Transylvania County, North Carolina      909   109    12.0\n10 Camden County, North Carolina           1220   142    11.6\n\n\nThe county with the largest relative margin of error is Chowan County, with a margin of error equal to 37.9% of its estimated median gross rent."
+  },
+  {
+    "objectID": "assignments/assignment2.html#sorting-counties-into-reliability-categories",
+    "href": "assignments/assignment2.html#sorting-counties-into-reliability-categories",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "Sorting counties into reliability categories",
+    "text": "Sorting counties into reliability categories\n\ncounty_data &lt;- county_data %&gt;%\n  mutate(reliability = case_when(\n    moe_pct &lt; 5  ~ \"High confidence\",\n    moe_pct &lt; 10 ~ \"Moderate\",\n    TRUE         ~ \"Low confidence\"\n  ))\n\ncount(county_data, reliability)\n\n# A tibble: 3 × 2\n  reliability         n\n  &lt;chr&gt;           &lt;int&gt;\n1 High confidence    51\n2 Low confidence     13\n3 Moderate           36\n\n\nThere are 51 high-confidence counties, 36 moderate-confidence counties, and 13 low-confidence counties."
+  },
+  {
+    "objectID": "assignments/assignment2.html#is-the-margin-of-error-bigger-in-small-places",
+    "href": "assignments/assignment2.html#is-the-margin-of-error-bigger-in-small-places",
+    "title": "Assignment 2: Who Do We Know the Least About?",
+    "section": "Is the margin of error bigger in small places?",
+    "text": "Is the margin of error bigger in small places?\nTo answer this we need population and our variable side by side, in the same row. That means a wide pull.\n\ncounty_wide &lt;- get_acs(\n  geography = \"county\",\n  variables = c(myvar = my_variable,\n                pop   = \"B01003_001\"),\n  state = my_state,\n  year = 2023,\n  survey = \"acs5\",\n  output = \"wide\"\n)\n\nhead(county_wide)\n\n# A tibble: 6 × 6\n  GEOID NAME                             myvarE myvarM   popE  popM\n  &lt;chr&gt; &lt;chr&gt;                             &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;\n1 37001 Alamance County, North Carolina    1007     28 174286    NA\n2 37003 Alexander County, North Carolina    745     36  36440    NA\n3 37005 Alleghany County, North Carolina    755    114  11075    NA\n4 37007 Anson County, North Carolina        849     63  21903    NA\n5 37009 Ashe County, North Carolina         774     39  26831    NA\n6 37011 Avery County, North Carolina        791     68  17643    NA\n\n\n\ncounty_wide &lt;- county_wide %&gt;%\n  mutate(moe_pct = myvarM / myvarE * 100) %&gt;%\n  mutate(reliability = case_when(\n    moe_pct &lt; 5  ~ \"High confidence\",\n    moe_pct &lt; 15 ~ \"Moderate\",\n    TRUE         ~ \"Low confidence\"\n  ))\n\nNow compare the average population of counties in each reliability category.\n\ncounty_wide %&gt;%\n  group_by(reliability) %&gt;%\n  summarize(\n    n_counties = n(),\n    avg_population = mean(popE)\n  )\n\n# A tibble: 3 × 3\n  reliability     n_counties avg_population\n  &lt;chr&gt;                &lt;int&gt;          &lt;dbl&gt;\n1 High confidence         51        173508.\n2 Low confidence           8         11434.\n3 Moderate                41         40097.\n\n\nHigh-confidence counties have an average population of about 173,508 people, while low-confidence counties average about 11,434 people. Moderate-confidence counties average about 40,097 people. This shows a clear pattern: smaller counties tend to have less reliable ACS median gross-rent estimates.\nReflection: The ACS estimates of median gross rent are least reliable in several small North Carolina counties, especially Chowan, Gates, Graham, Hyde, Cherokee, Washington, and Tyrrell Counties. Chowan County has the largest relative margin of error: its estimated median gross rent is $766, with a margin of error of $290, or 37.9%. This means the published estimate has a large amount of uncertainty and should not be treated as a precise measure of what renters pay there. Gates and Graham Counties also have very high relative margins of error, at 22.8% and 21.5%, respectively.\nThis pattern occurs because the ACS is based on a sample rather than a complete count of every household. Smaller counties have fewer households in the survey sample, so their estimates are less stable and have larger margins of error. In contrast, counties with larger populations generally have more survey responses and therefore more reliable estimates. My results show that 51 North Carolina counties have high-confidence estimates, while 13 counties fall into the low-confidence category.\nIf a state agency allocated housing-assistance funding based only on these median-rent estimates, without considering their margins of error, it could make unfair decisions. Small counties with uncertain estimates could receive too little funding if their rent is underestimated, or funds could be directed inefficiently if rent is overestimated. Residents of rural counties, where housing data are already limited, would be most likely to be affected. Policymakers should therefore use ACS estimates together with their margins of error and avoid treating all county-level numbers as equally certain."
   }
 ]
