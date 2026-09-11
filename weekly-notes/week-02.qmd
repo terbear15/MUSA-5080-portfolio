@@ -6,35 +6,64 @@ date: 2026-09-04
 
 ## What We Did
 
-
-First we had a quiz
+First we had a quiz. Then reviewed the portfolio workflow and created a practice folder for in-class R work.
+We then learned the basic structure of R code, including objects, assignment,
+functions, arguments, comments, packages, and the console.
+We also introduced Census data through the American Community Survey (ACS) and
+used tidycensus to retrieve county-level data for Pennsylvania.
 
 ## Key Concepts
 
-Three places a file can live:
+R code can save a result in an object:
 
-1. **My computer** — where I edit
-2. **GitHub.com** — where it's stored
-3. **My live site** — what the world sees
+result <- filter(counties, population > 50000)
+result is the object that stores the output.
+<- is the assignment arrow.
+filter() is a function, also called a verb in dplyr.
+counties is the input data.
+population > 50000 is an argument.
+Anything after # is a comment and does not run.
 
-The loop: **Edit → Save → Render → Commit → Push → wait → refresh**
+The ACS is a survey of roughly 3% of U.S. households. It produces an estimate and a margin of error (MOE). The 1-year ACS is more current but only covers places with populations above 65,000, while the 5-year ACS covers smaller geographies such as tracts and block groups.
+
+A GEOID is an identifier stored as text so it keeps leading zeros. For example, Pennsylvania GEOIDs begin with 42. Census data can be in:
+
+Long/tidy format: one row for each geography-variable combination.
+Wide format: one row per geography, with each variable in a separate
+column.
+
+Wide format is useful when I need to compare variables, such as population and income, side by side.
 
 ## Proving R Works
 
-The chunk below runs when this page renders. If you can see a result underneath
-it on your published site, R and Quarto are talking to each other correctly.
+The chunk below loads the tools used in class, downloads Pennsylvania county income data from the ACS, and displays the first few rows. If the table appears
+on the published page, R, Quarto, and tidycensus are working correctly.
 
 ```{r}
-sessionInfo()$R.version$version.string
+library(tidyverse)
+library(tidycensus)
+
+pa_income <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  state = "PA",
+  year = 2023,
+  survey = "acs5"
+)
+
+head(pa_income)
 ```
 
 ## Reflection
 
-What I want out of this course: Get to know the basics of coding and try my best to implement that into my field of study (architecture and urban design)
+This week made R feel more understandable because I learned that code is made of small, repeatable pieces: data goes into a verb, and a new table comes out.
+I am still new to coding, but the idea of using pipes as “and then” makes the workflow easier to follow.
 
-One thing I'm nervous about: I have no experience in coding so I am extremelly nervous about the future courses. However, I am really excited to learn a lot.
+I am also beginning to understand how Census data can be used in urban analysis.
+The difference between an estimate and its margin of error seems especially important when comparing small counties or neighborhoods.
 
 ## Questions I Still Have
 
-- 
-- 
+- When should I use long format versus wide format before beginning an analysis?
+- How can I use Census tract data while accounting for boundaries that change
+over time?
