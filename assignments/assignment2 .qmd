@@ -1,0 +1,334 @@
+---
+title: "Assignment 2: Who Do We Know the Least About?"
+subtitle: "Measuring uncertainty in American Community Survey data"
+author: "YOUR NAME HERE"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: false
+execute:
+  warning: false
+  message: false
+---
+
+::: {.callout-important}
+## Read this first, then delete this box
+
+**Where this file goes:** `assignments/assignment2.qmd` in your portfolio repo.
+
+**This is a portfolio piece.** It will be published on your website where employers
+can see it. So:
+
+- **Delete every callout box like this one** before your final render. They're
+  instructions, not content.
+- Replace `YOUR NAME HERE` in the header above.
+- Write in complete sentences. Someone who isn't in this class should be able to
+  read it and follow what you did.
+
+**Graded 0 / 1 / 2.** A 2 means it runs, it's complete, and the writing shows you
+understood what the numbers meant — not that you did something fancy.
+
+**Due:** before next class. Rendered, committed, pushed, and visible on your live site.
+:::
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+```
+
+::: {.callout-note}
+## Delete this box
+
+If this chunk fails, your Census API key isn't set up. Check your `.Renviron`
+file, then **restart R** — that's the step people forget.
+:::
+
+---
+
+## The question
+
+Every number the American Community Survey publishes is an estimate drawn from a
+sample, not a count. That means every number comes with a margin of error — a
+statement about how wrong it might be.
+
+Most people ignore it. In this assignment, you won't.
+
+::: {.callout-tip}
+## Delete this box
+
+Rewrite the paragraph below in your own words once you've picked your state and
+variable. Two or three sentences saying what you're looking at and why.
+:::
+
+**In this analysis, I look at [YOUR VARIABLE] across counties in [YOUR STATE], and
+ask which communities we measure most and least reliably.**
+
+---
+
+## Choosing what to measure
+
+::: {.callout-note}
+## Instructions — delete this box
+
+Pick **a state** and **a variable**. Anything except Pennsylvania and median
+household income, which we did in class.
+
+Some variables that work well:
+
+| Code | What it is |
+|------|-----------|
+| `B19013_001` | Median household income |
+| `B25064_001` | Median gross rent |
+| `B25077_001` | Median home value |
+| `B01002_001` | Median age |
+| `B08303_001` | Total commuters (travel time table) |
+| `B15003_022` | Number with a bachelor's degree |
+
+Want something else? Run this in your **console** (not in a chunk):
+
+```r
+vars <- load_variables(2023, "acs5")
+View(vars)
+```
+
+Then use the search box.
+:::
+
+```{r}
+my_state <- "___"        # two-letter abbreviation, in quotes
+my_variable <- "___"     # the variable code, in quotes
+```
+
+## Pulling the data
+
+```{r}
+county_data <- get_acs(
+  geography = "county",
+  variables = my_variable,
+  state = my_state,
+  year = 2023,
+  survey = "acs5"
+)
+```
+
+Let's look at what came back.
+
+```{r}
+dim(county_data)
+head(county_data)
+```
+
+::: {.callout-tip}
+## Delete this box
+
+Below, say how many counties are in your state and confirm your row count matches.
+One sentence.
+:::
+
+**[How many rows did you get? Does that match the number of counties in your state?]**
+
+---
+
+## How big is the margin of error?
+
+A margin of error of 3,000 means something very different for an estimate of 20,000
+than for an estimate of 200,000. To compare across places, we need it as a
+percentage.
+
+```{r}
+county_data <- county_data %>%
+  mutate(moe_pct = ___ / ___ * 100)
+```
+
+::: {.callout-note}
+## Delete this box
+
+Fill in the two blanks. You want: how big is the margin of error, relative to the
+estimate, as a percentage?
+:::
+
+Now sort to see which counties are measured least reliably.
+
+```{r}
+county_data %>%
+  arrange(desc(moe_pct)) %>%
+  select(NAME, estimate, moe, moe_pct) %>%
+  head(10)
+```
+
+::: {.callout-tip}
+## Delete this box
+
+Write a sentence or two naming the least reliable county and its `moe_pct`.
+:::
+
+**[Which county has the largest margin of error relative to its estimate? How large
+is it?]**
+
+---
+
+## Sorting counties into reliability categories
+
+```{r}
+county_data <- county_data %>%
+  mutate(reliability = case_when(
+    moe_pct < 5  ~ "High confidence",
+    moe_pct < 10 ~ "Moderate",
+    TRUE         ~ "Low confidence"
+  ))
+
+count(county_data, reliability)
+```
+
+::: {.callout-note}
+## Delete this box
+
+Those cutoffs (5% and 10%) are a bit of a judgment call, not a law of nature. If almost
+every county lands in one category, adjust them so the split is informative for
+*your* variable — then say in your writing that you changed them and why. (I have a feeling for county-level, you may end up in high confidence everywhere - is smaller geographies where it really shows up. So feel free to change those numbers around a bit)
+:::
+
+**[How many counties fall into each category?]**
+
+---
+
+## Is the margin of error bigger in small places?
+
+To answer this we need population and our variable side by side, in the same row.
+That means a **wide** pull.
+
+```{r}
+county_wide <- get_acs(
+  geography = "county",
+  variables = c(myvar = my_variable,
+                pop   = "B01003_001"),
+  state = my_state,
+  year = 2023,
+  survey = "acs5",
+  output = "wide"
+)
+
+head(county_wide)
+```
+
+::: {.callout-note}
+## Delete this box
+
+Notice the column names: `myvarE`, `myvarM`, `popE`, `popM`. The `E` and `M`
+suffixes are estimate and margin of error.
+:::
+
+```{r}
+county_wide <- county_wide %>%
+  mutate(moe_pct = myvarM / myvarE * 100) %>%
+  mutate(reliability = case_when(
+    moe_pct < 5  ~ "High confidence",
+    moe_pct < 15 ~ "Moderate",
+    TRUE         ~ "Low confidence"
+  ))
+```
+
+Now compare the average population of counties in each reliability category.
+
+```{r}
+county_wide %>%
+  group_by(___) %>%
+  summarize(
+    n_counties = n(),
+    avg_population = mean(___)
+  )
+```
+
+::: {.callout-note}
+## Delete this box
+
+Two blanks. What are you grouping by? What are you averaging?
+:::
+
+::: {.callout-tip}
+## Delete this box
+
+This table is the heart of the assignment. Describe what it shows in two or three
+sentences.
+:::
+
+**[What is the average population of high-confidence counties versus low-confidence
+counties? Is there a pattern?]**
+
+---
+
+## What this means for policy
+
+::: {.callout-important}
+## Instructions — delete this box
+
+**Write 200–250 words.** 
+
+Address all three:
+
+1. **Which communities in your state do we know the least about?** Name specific
+   counties from your results.
+2. **Why?** Connect the pattern to how the ACS actually works — it's a sample, and
+   smaller places yield smaller samples.
+3. **What could go wrong?** Imagine a state agency allocating funding using your
+   variable, treating every county's number as equally certain. Who is likely to be
+   hurt, and how?
+
+Use your own numbers. 
+:::
+
+**[Your 200–250 word reflection goes here.]**
+
+---
+
+## Optional challenges - For those craving more
+
+::: {.callout-note}
+## Delete this box
+
+**None of these are graded.** There are no extra points. A complete, well-written assignment earns a 2 either way.
+
+They're here for anyone who finished the above and found it straightforward. Pick
+one (or more) that interests you. 
+
+1. **Propagate the margin of error.** If you compute a derived value — a percentage,
+   a ratio, a sum — its uncertainty depends on the uncertainty of its inputs, and
+   you can't just carry the original MOE along. The Census Bureau publishes formulas
+   for this, and `tidycensus` implements them: `moe_sum()`, `moe_prop()`,
+   `moe_ratio()`. Compute something derived, and get its margin of error right.
+
+2. **Parameterize the report.** Add `params:` to the YAML so the state is an input
+   rather than hard-coded, and the same file regenerates for any state. Render it
+   from the terminal with `quarto render assignment2.qmd -P state:NY`.
+
+3. **Write a function and iterate.** Wrap the data pull in a function, then use
+   `purrr::map_dfr()` to run it across several states at once. Does the
+   small-places-are-noisier pattern hold everywhere, or are some states different?
+
+4. **Change the geographic scale.** Run the same variable at `geography = "tract"`
+   inside one county. Compare the margins of error to what you saw at county level.
+   What does that imply about the resolution at which you can actually trust ACS
+   data?
+
+If you try one, add a short section describing what you did and what you found.
+:::
+
+---
+
+## Before you submit
+
+::: {.callout-note}
+## Delete this box — checklist
+
+- [ ] Your name is in the YAML header
+- [ ] Every instruction callout is deleted
+- [ ] Every `[bracketed prompt]` is replaced with your own writing
+- [ ] No `___` blanks remain anywhere
+- [ ] The file is at `assignments/assignment2.qmd`
+- [ ] **Session → Restart R**, then render the whole project. It works.
+- [ ] Committed and pushed
+- [ ] You opened your live site and looked at the published page
+:::
