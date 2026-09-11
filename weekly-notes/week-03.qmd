@@ -1,7 +1,7 @@
 ---
-title: "Week 1: Getting Set Up"
+title: "Week 3: Getting Set Up"
 description: "First impressions, and getting the workflow running."
-date: 2026-08-28
+date: 2026-09-11
 ---
 
 ## What We Did
