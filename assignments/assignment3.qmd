@@ -15,3 +15,390 @@ execute:
 ## Article
 
 [New Census figures on Philly neighborhoods show inequality, high numbers of whites living in poverty](https://whyy.org/articles/new-census-figures-on-philly-neighborhoods-show-inequality-high-numbers-of-whites-living-in-poverty/)
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(tidycensus)
+library(gt)
+```
+## Part 1: Reconstructing the Article's Data
+
+The article compares Philadelphia neighborhood poverty using the 2006–2010 and
+2013–2017 ACS 5-year estimates. I use `survey = "acs5"` with `year = 2010` and
+`year = 2017` to retrieve those periods. The periods do not overlap, so they
+do not share collection years. For the change test, I use the standard
+approximation that the estimates from the two periods are independent.
+
+I use table B17001: `B17001_002` counts people below the poverty level, and
+`B17001_001` counts people for whom poverty status is determined. Dividing
+these gives the poverty rate. I assume this measure corresponds to the
+article's overall poverty measure. Because its neighborhood-to-tract definitions
+are unavailable, I compare Philadelphia census tracts rather than reconstructing
+its neighborhood totals. I match tracts by GEOID and assume matched tracts
+represent comparable areas; matching identifiers alone does not verify unchanged
+boundaries.
+```{r}
+#| label: pull-poverty-data
+#| message: false
+#| warning: false
+
+poverty_10 <- get_acs(
+  geography = "tract",
+  state = "PA",
+  county = "Philadelphia",
+  variables = c(
+    poor = "B17001_002",
+    poverty_universe = "B17001_001"
+  ),
+  year = 2010,
+  survey = "acs5",
+  output = "wide"
+)
+
+poverty_17 <- get_acs(
+  geography = "tract",
+  state = "PA",
+  county = "Philadelphia",
+  variables = c(
+    poor = "B17001_002",
+    poverty_universe = "B17001_001"
+  ),
+  year = 2017,
+  survey = "acs5",
+  output = "wide"
+)
+
+dim(poverty_10)
+dim(poverty_17)
+```
+```{r}
+#| label: join-periods
+
+poverty_10 <- poverty_10 %>%
+  select(
+    GEOID,
+    poor_10E = poorE,
+    poor_10M = poorM,
+    universe_10E = poverty_universeE,
+    universe_10M = poverty_universeM
+  )
+
+poverty_17 <- poverty_17 %>%
+  select(
+    GEOID,
+    NAME,
+    poor_17E = poorE,
+    poor_17M = poorM,
+    universe_17E = poverty_universeE,
+    universe_17M = poverty_universeM
+  )
+
+poverty <- poverty_17 %>%
+  left_join(poverty_10, by = "GEOID")
+
+poverty %>%
+  summarize(
+    n_tracts = n(),
+    no_2010_match = sum(is.na(poor_10E))
+  )
+```
+
+## Part 2: Testing Poverty Change
+```{r}
+#| label: calculate-poverty-rates
+
+poverty <- poverty %>%
+  mutate(
+    poverty_rate_10 = poor_10E / universe_10E,
+    poverty_moe_10 = moe_prop(
+      poor_10E,
+      universe_10E,
+      poor_10M,
+      universe_10M
+    ),
+    poverty_se_10 = poverty_moe_10 / 1.645,
+    poverty_cv_10 = poverty_se_10 / poverty_rate_10 * 100,
+
+    poverty_rate_17 = poor_17E / universe_17E,
+    poverty_moe_17 = moe_prop(
+      poor_17E,
+      universe_17E,
+      poor_17M,
+      universe_17M
+    ),
+    poverty_se_17 = poverty_moe_17 / 1.645,
+    poverty_cv_17 = poverty_se_17 / poverty_rate_17 * 100,
+
+    reliability_17 = case_when(
+      is.na(poverty_cv_17) ~ NA_character_,
+      poverty_cv_17 < 12  ~ "Reliable",
+      poverty_cv_17 <= 40 ~ "Somewhat reliable",
+      TRUE                ~ "Unreliable"
+    )
+  )
+
+poverty %>%
+  summarize(
+    n_tracts = n(),
+    missing_2010_rate = sum(is.na(poverty_rate_10)),
+    missing_2017_rate = sum(is.na(poverty_rate_17))
+  )
+```
+```{r}
+#| label: inspect-missing-rates
+
+poverty %>%
+  filter(
+    is.na(poverty_rate_10) | is.na(poverty_rate_17)
+  ) %>%
+  select(
+    GEOID,
+    NAME,
+    poor_10E,
+    universe_10E,
+    poor_17E,
+    universe_17E
+  ) %>%
+  print(n = Inf, width = Inf)
+```
+```{r}
+#| label: keep-comparable-tracts
+
+poverty_compare <- poverty %>%
+  filter(
+    universe_10E > 0,
+    universe_17E > 0
+  )
+
+nrow(poverty_compare)
+```
+```{r}
+#| label: test-poverty-change
+
+poverty_compare <- poverty_compare %>%
+  mutate(
+    change_pp = (poverty_rate_17 - poverty_rate_10) * 100,
+    change_moe_pp = sqrt(
+      poverty_moe_10^2 + poverty_moe_17^2
+    ) * 100,
+    lower = change_pp - change_moe_pp,
+    upper = change_pp + change_moe_pp,
+    change_result = case_when(
+      is.na(lower) | is.na(upper) ~ "Cannot test",
+      lower > 0 ~ "Detectable increase",
+      upper < 0 ~ "Detectable decrease",
+      TRUE ~ "No detectable change"
+    )
+  )
+
+poverty_compare %>%
+  count(change_result)
+```
+```{r}
+#| label: reliability-both-periods
+
+poverty_compare <- poverty_compare %>%
+  mutate(
+    reliability_10 = case_when(
+      is.na(poverty_cv_10) ~ "Cannot assess",
+      poverty_cv_10 < 12 ~ "Reliable",
+      poverty_cv_10 <= 40 ~ "Somewhat reliable",
+      TRUE ~ "Unreliable"
+    ),
+    reliability_17 = case_when(
+      is.na(poverty_cv_17) ~ "Cannot assess",
+      poverty_cv_17 < 12 ~ "Reliable",
+      poverty_cv_17 <= 40 ~ "Somewhat reliable",
+      TRUE ~ "Unreliable"
+    )
+  )
+
+poverty_compare %>%
+  count(reliability_10)
+
+poverty_compare %>%
+  count(reliability_17)
+```
+```{r}
+#| label: reliability-table
+
+reliability_counts_10 <- poverty_compare %>%
+  count(reliability_10) %>%
+  rename(
+    reliability = reliability_10,
+    tracts_2010 = n
+  )
+
+reliability_counts_17 <- poverty_compare %>%
+  count(reliability_17) %>%
+  rename(
+    reliability = reliability_17,
+    tracts_2017 = n
+  )
+
+reliability_table <- reliability_counts_10 %>%
+  left_join(reliability_counts_17, by = "reliability") %>%
+  mutate(
+    symbol = case_when(
+      reliability == "Reliable" ~ "✓",
+      reliability == "Somewhat reliable" ~ "~",
+      reliability == "Unreliable" ~ "!"
+    )
+  ) %>%
+  select(symbol, reliability, tracts_2010, tracts_2017)
+
+reliability_table %>%
+  gt() %>%
+  tab_header(
+    title = "Reliability of Philadelphia Tract Poverty Rates",
+    subtitle = "376 tracts included in the change comparison"
+  ) %>%
+  cols_label(
+    symbol = "Symbol",
+    reliability = "CV category",
+    tracts_2010 = "2006–2010",
+    tracts_2017 = "2013–2017"
+  ) %>%
+  tab_source_note(
+    source_note = "Source: ACS 5-year estimates, table B17001. Jurjevich et al. (2018) thresholds: ✓ Reliable, CV < 12%; ~ Somewhat reliable, CV 12–40%; ! Unreliable, CV > 40%."
+  )
+```
+```{r}
+#| label: change-error-bars
+#| fig-width: 9
+#| fig-height: 8
+
+largest_increases <- poverty_compare %>%
+  arrange(desc(change_pp)) %>%
+  head(10)
+
+largest_decreases <- poverty_compare %>%
+  arrange(change_pp) %>%
+  head(10)
+
+plot_tracts <- bind_rows(largest_increases, largest_decreases)
+
+ggplot(
+  plot_tracts,
+  aes(x = reorder(GEOID, change_pp), y = change_pp)
+) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_errorbar(
+    aes(ymin = lower, ymax = upper),
+    width = 0.2
+  ) +
+  geom_point(aes(color = change_result), size = 2.5) +
+  coord_flip() +
+  labs(
+    title = "Largest Estimated Changes in Philadelphia Tract Poverty",
+    subtitle = "2006–2010 to 2013–2017: 10 largest increases and 10 largest decreases",
+    x = "Census tract GEOID",
+    y = "Change in poverty rate (percentage points)",
+    color = "90% confidence test",
+    caption = "Source: ACS 5-year estimates, B17001. Bars show 90% confidence intervals for change."
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+This figure shows the ten largest estimated increases and ten largest estimated
+decreases, rather than all 376 tracts. Error bars that cross zero indicate changes
+that are not statistically detectable at 90% confidence.
+
+Tract 9891 illustrates the importance of uncertainty. Its estimated poverty rate
+increased by 23.3 percentage points, but the change's margin of error is about
+221 percentage points. Its poverty-status population estimates were only 68 and
+53, with margins of error larger than those estimates. The resulting approximate
+interval extends beyond possible changes, indicating that this comparison is too
+imprecise to support a conclusion about the direction of change.
+
+```{r}
+#| label: change-summary-chart
+#| fig-width: 8
+#| fig-height: 5
+
+change_counts <- poverty_compare %>%
+  count(change_result)
+
+ggplot(
+  change_counts,
+  aes(x = change_result, y = n)
+) +
+  geom_col(fill = "steelblue") +
+  geom_text(aes(label = n), vjust = -0.5) +
+  labs(
+    title = "Most Philadelphia Tracts Had No Detectable Poverty-Rate Change",
+    subtitle = "2006–2010 compared with 2013–2017, using 90% confidence",
+    x = NULL,
+    y = "Number of census tracts",
+    caption = "Source: ACS 5-year estimates, B17001. Includes 376 tracts with defined rates in both periods."
+  ) +
+  theme_minimal()
+```
+### What the results show
+
+Of the 376 tracts included in the comparison, 36 showed a statistically detectable
+increase in poverty and 27 showed a detectable decrease at 90% confidence.
+The remaining 313 tracts, or 83.2%, showed no statistically detectable change.
+This does not mean their poverty rates stayed exactly the same. It means the
+estimated changes were not large enough relative to their uncertainty to
+distinguish them from zero.
+
+The reliability table also shows that most tract poverty rates were only
+somewhat reliable. In 2006–2010, 11 tracts were classified as reliable, 321 as
+somewhat reliable, and 44 as unreliable. In 2013–2017, those counts were 22,
+332, and 22. These categories describe the precision of each period's poverty
+rate; they do not directly determine whether the change between periods is
+statistically detectable.
+
+Overall, the results show increases in some tracts and decreases in others.
+They do not establish what happened in the specific neighborhoods named in the
+article, because the article's neighborhood-to-tract definitions are unavailable.
+The tract counts also do not measure the change in Philadelphia's overall poverty
+rate, since tracts contain different numbers of people.
+
+## Part 3: Which Claims Does the Evidence Support?
+
+**Supported:** The article reports that poverty increased in some parts of
+Philadelphia. My tract-level analysis supports that broad pattern: 36 tracts
+showed statistically detectable increases between 2006–2010 and 2013–2017.
+However, 27 tracts showed detectable decreases, so the direction of change
+varied across the city. **Not supported by this analysis:** Treating every
+estimated increase as clear evidence that conditions worsened would overstate
+the findings. For example, Tract 9891 had an estimated increase of 23.3 percentage
+points, but its extremely large margin of error prevents a confident conclusion
+about the direction of change. Across all 376 comparable tracts, 313 changes
+were not statistically distinguishable from zero. This does not prove that
+poverty was unchanged in those places.
+
+**Cannot be determined:** I cannot verify the article's claim that Eastwick's
+poverty rate rose from 12% to 26%, or that it had the largest neighborhood
+increase, because the article does not identify the tracts used to define each
+neighborhood. The same limitation prevents verification of Fairhill's reported
+61% poverty rate. My analysis also does not test the article's claim about
+increasing poverty among white residents: the variables used here describe
+poverty across the full poverty-status population, not a specific racial group.
+Finally, these comparisons cannot establish the suggested causes of change,
+such as opioid use or migration. Those explanations would require additional
+evidence.
+
+## Part 4: A More Defensible Account
+
+Philadelphia's poverty trends varied across census tracts between the
+2006–2010 and 2013–2017 American Community Survey periods. Among 376 tracts
+with usable poverty rates in both periods, 36 showed increases and 27 showed
+decreases that were statistically detectable at 90% confidence. For the other
+313, uncertainty was too large to establish a change. These results indicate
+worsening poverty in some areas and improvement in others, rather than a
+uniform trend. They also show why a large estimated increase should not
+automatically be treated as a clear deterioration. The article's exact figures
+for neighborhoods such as Eastwick and Fairhill cannot be verified through this
+tract-level analysis without knowing how the neighborhood boundaries were
+defined.
+
+
+
+
+
+
