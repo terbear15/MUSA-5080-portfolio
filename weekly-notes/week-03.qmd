@@ -1,43 +1,60 @@
 ---
-title: "Week 3: Getting Set Up"
-description: "First impressions, and getting the workflow running."
+title: "Week 3: Visualization, Geoms, & ggplot2"
+description: "Building graphs and showing uncertainty in Census data."
 date: 2026-09-11
 ---
 
 ## What We Did
 
-<!-- CHANGE THIS: replace with your own notes -->
-
-Set up the portfolio workflow: made a repository from a template, cloned it with
-GitHub Desktop, edited files in RStudio, rendered with Quarto, and published to
-GitHub Pages.
+We looked at Anscombe's quartet to see how datasets with similar summary
+statistics can look very different when graphed. We learned how to build plots
+with ggplot2, choose geoms for different questions, and show uncertainty in
+American Community Survey (ACS) estimates.
 
 ## Key Concepts
 
-Three places a file can live:
+A ggplot has three basic parts:
 
-1. **My computer** — where I edit
-2. **GitHub.com** — where it's stored
-3. **My live site** — what the world sees
+1. **Data** — the table being plotted
+2. **Aesthetics** — variables mapped to things like x, y, and color with `aes()`
+3. **Geoms** — the marks drawn on the graph, such as points, lines, or bars
 
-The loop: **Edit → Save → Render → Commit → Push → wait → refresh**
+Use `+` to add layers to a plot. For example, `geom_point()` makes a scatterplot,
+while `geom_histogram()` shows the distribution of one numeric variable.
+
+A variable goes **inside** `aes()` if its values control the plot's appearance:
+`aes(color = reliability)`. A fixed color goes **outside** `aes()`:
+`color = "steelblue"`.
+
+ACS estimates have margins of error (MOEs). A large MOE means I should be
+careful when comparing estimates, especially for small areas.
 
 ## Proving R Works
 
-The chunk below runs when this page renders. If you can see a result underneath
-it on your published site, R and Quarto are talking to each other correctly.
+The chunk below uses a dataset included with R to make a scatterplot. If the
+graph appears on my published site, ggplot2 is working in Quarto.
 
 ```{r}
-sessionInfo()$R.version$version.string
+library(ggplot2)
+
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point(color = "steelblue") +
+  labs(
+    x = "Weight (1,000 pounds)",
+    y = "Miles per gallon"
+  )
 ```
 
 ## Reflection
 
-What I want out of this course: Get to know the basics of coding and try my best to implement that into my field of study (architecture and urban design)
-
-One thing I'm nervous about: I have no experience in coding so I am extremelly nervous about the future courses. However, I am really excited to learn a lot.
+Anscombe's quartet helped me understand why I should look at a graph before
+trusting a summary statistic. I am beginning to see how ggplot2 works: choose
+the data, map variables to the graph, and add a geom. When using Census data, I
+also need to pay attention to uncertainty instead of treating every estimate
+as an exact number.
 
 ## Questions I Still Have
 
-- Why do we need to push stuff to GitHub after rendering, is it for depository on cloud purposes?
-- How do I publish pdf and jpg files on my portfolio website?
+- How do I decide whether a scatterplot needs a trend line?
+- If two ACS estimates have overlapping error bars, can I still say they are different?
+- How can I show margins of error on a map without making it hard to read?

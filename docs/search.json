@@ -2,44 +2,44 @@
   {
     "objectID": "weekly-notes/week-03.html",
     "href": "weekly-notes/week-03.html",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "",
-    "text": "Set up the portfolio workflow: made a repository from a template, cloned it with GitHub Desktop, edited files in RStudio, rendered with Quarto, and published to GitHub Pages."
+    "text": "We looked at Anscombe’s quartet to see how datasets with similar summary statistics can look very different when graphed. We learned how to build plots with ggplot2, choose geoms for different questions, and show uncertainty in American Community Survey (ACS) estimates."
   },
   {
     "objectID": "weekly-notes/week-03.html#what-we-did",
     "href": "weekly-notes/week-03.html#what-we-did",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "",
-    "text": "Set up the portfolio workflow: made a repository from a template, cloned it with GitHub Desktop, edited files in RStudio, rendered with Quarto, and published to GitHub Pages."
+    "text": "We looked at Anscombe’s quartet to see how datasets with similar summary statistics can look very different when graphed. We learned how to build plots with ggplot2, choose geoms for different questions, and show uncertainty in American Community Survey (ACS) estimates."
   },
   {
     "objectID": "weekly-notes/week-03.html#key-concepts",
     "href": "weekly-notes/week-03.html#key-concepts",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "Key Concepts",
-    "text": "Key Concepts\nThree places a file can live:\n\nMy computer — where I edit\nGitHub.com — where it’s stored\nMy live site — what the world sees\n\nThe loop: Edit → Save → Render → Commit → Push → wait → refresh"
+    "text": "Key Concepts\nA ggplot has three basic parts:\n\nData — the table being plotted\nAesthetics — variables mapped to things like x, y, and color with aes()\nGeoms — the marks drawn on the graph, such as points, lines, or bars\n\nUse + to add layers to a plot. For example, geom_point() makes a scatterplot, while geom_histogram() shows the distribution of one numeric variable.\nA variable goes inside aes() if its values control the plot’s appearance: aes(color = reliability). A fixed color goes outside aes(): color = \"steelblue\".\nACS estimates have margins of error (MOEs). A large MOE means I should be careful when comparing estimates, especially for small areas."
   },
   {
     "objectID": "weekly-notes/week-03.html#proving-r-works",
     "href": "weekly-notes/week-03.html#proving-r-works",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "Proving R Works",
-    "text": "Proving R Works\nThe chunk below runs when this page renders. If you can see a result underneath it on your published site, R and Quarto are talking to each other correctly.\n\nsessionInfo()$R.version$version.string\n\n[1] \"R version 4.6.1 (2026-06-24 ucrt)\""
+    "text": "Proving R Works\nThe chunk below uses a dataset included with R to make a scatterplot. If the graph appears on my published site, ggplot2 is working in Quarto.\n\nlibrary(ggplot2)\n\nggplot(mtcars, aes(x = wt, y = mpg)) +\n  geom_point(color = \"steelblue\") +\n  labs(\n    x = \"Weight (1,000 pounds)\",\n    y = \"Miles per gallon\"\n  )"
   },
   {
     "objectID": "weekly-notes/week-03.html#reflection",
     "href": "weekly-notes/week-03.html#reflection",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "Reflection",
-    "text": "Reflection\nWhat I want out of this course: Get to know the basics of coding and try my best to implement that into my field of study (architecture and urban design)\nOne thing I’m nervous about: I have no experience in coding so I am extremelly nervous about the future courses. However, I am really excited to learn a lot."
+    "text": "Reflection\nAnscombe’s quartet helped me understand why I should look at a graph before trusting a summary statistic. I am beginning to see how ggplot2 works: choose the data, map variables to the graph, and add a geom. When using Census data, I also need to pay attention to uncertainty instead of treating every estimate as an exact number."
   },
   {
     "objectID": "weekly-notes/week-03.html#questions-i-still-have",
     "href": "weekly-notes/week-03.html#questions-i-still-have",
-    "title": "Week 3: Getting Set Up",
+    "title": "Week 3: Visualization, Geoms, & ggplot2",
     "section": "Questions I Still Have",
-    "text": "Questions I Still Have\n\nWhy do we need to push stuff to GitHub after rendering, is it for depository on cloud purposes?\nHow do I publish pdf and jpg files on my portfolio website?"
+    "text": "Questions I Still Have\n\nHow do I decide whether a scatterplot needs a trend line?\nIf two ACS estimates have overlapping error bars, can I still say they are different?\nHow can I show margins of error on a map without making it hard to read?"
   },
   {
     "objectID": "weekly-notes/week-01.html",
@@ -158,7 +158,7 @@
     "href": "weekly-notes/index.html",
     "title": "Weekly Notes",
     "section": "",
-    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 3: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
+    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 4: Spatial Data, Joins, & Coordinate Systems\n\n\nConnecting Census data to maps and measuring spatial relationships.\n\n\n\n\n\nSep 18, 2026\n\n\n\n\n\n\n\nWeek 3: Visualization, Geoms, & ggplot2\n\n\nBuilding graphs and showing uncertainty in Census data.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "weekly-notes/week-02.html",
@@ -257,5 +257,47 @@
     "title": "Assignment 2: Who Do We Know the Least About?",
     "section": "Is the margin of error bigger in small places?",
     "text": "Is the margin of error bigger in small places?\nTo answer this we need population and our variable side by side, in the same row. That means a wide pull.\n\ncounty_wide &lt;- get_acs(\n  geography = \"county\",\n  variables = c(myvar = my_variable,\n                pop   = \"B01003_001\"),\n  state = my_state,\n  year = 2023,\n  survey = \"acs5\",\n  output = \"wide\"\n)\n\nhead(county_wide)\n\n# A tibble: 6 × 6\n  GEOID NAME                             myvarE myvarM   popE  popM\n  &lt;chr&gt; &lt;chr&gt;                             &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;\n1 37001 Alamance County, North Carolina    1007     28 174286    NA\n2 37003 Alexander County, North Carolina    745     36  36440    NA\n3 37005 Alleghany County, North Carolina    755    114  11075    NA\n4 37007 Anson County, North Carolina        849     63  21903    NA\n5 37009 Ashe County, North Carolina         774     39  26831    NA\n6 37011 Avery County, North Carolina        791     68  17643    NA\n\n\n\ncounty_wide &lt;- county_wide %&gt;%\n  mutate(moe_pct = myvarM / myvarE * 100) %&gt;%\n  mutate(reliability = case_when(\n    moe_pct &lt; 5  ~ \"High confidence\",\n    moe_pct &lt; 15 ~ \"Moderate\",\n    TRUE         ~ \"Low confidence\"\n  ))\n\nNow compare the average population of counties in each reliability category.\n\ncounty_wide %&gt;%\n  group_by(reliability) %&gt;%\n  summarize(\n    n_counties = n(),\n    avg_population = mean(popE)\n  )\n\n# A tibble: 3 × 3\n  reliability     n_counties avg_population\n  &lt;chr&gt;                &lt;int&gt;          &lt;dbl&gt;\n1 High confidence         51        173508.\n2 Low confidence           8         11434.\n3 Moderate                41         40097.\n\n\nHigh-confidence counties have an average population of about 173,508 people, while low-confidence counties average about 11,434 people. Moderate-confidence counties average about 40,097 people. This shows a clear pattern: smaller counties tend to have less reliable ACS median gross-rent estimates.\nReflection: The ACS estimates of median gross rent are least reliable in several small North Carolina counties, especially Chowan, Gates, Graham, Hyde, Cherokee, Washington, and Tyrrell Counties. Chowan County has the largest relative margin of error: its estimated median gross rent is $766, with a margin of error of $290, or 37.9%. This means the published estimate has a large amount of uncertainty and should not be treated as a precise measure of what renters pay there. Gates and Graham Counties also have very high relative margins of error, at 22.8% and 21.5%, respectively.\nThis pattern occurs because the ACS is based on a sample rather than a complete count of every household. Smaller counties have fewer households in the survey sample, so their estimates are less stable and have larger margins of error. In contrast, counties with larger populations generally have more survey responses and therefore more reliable estimates. My results show that 51 North Carolina counties have high-confidence estimates, while 13 counties fall into the low-confidence category.\nIf a state agency allocated housing-assistance funding based only on these median-rent estimates, without considering their margins of error, it could make unfair decisions. Small counties with uncertain estimates could receive too little funding if their rent is underestimated, or funds could be directed inefficiently if rent is overestimated. Residents of rural counties, where housing data are already limited, would be most likely to be affected. Policymakers should therefore use ACS estimates together with their margins of error and avoid treating all county-level numbers as equally certain."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html",
+    "href": "weekly-notes/week-04.html",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "",
+    "text": "We joined Census income data from different years using GEOID, then learned how spatial data stores geometry alongside a table. We discussed coordinate reference systems (CRS), map projections, and why distance calculations need appropriate units. We also introduced sf functions for finding tracts near stations and measuring spatial relationships."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html#what-we-did",
+    "href": "weekly-notes/week-04.html#what-we-did",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "",
+    "text": "We joined Census income data from different years using GEOID, then learned how spatial data stores geometry alongside a table. We discussed coordinate reference systems (CRS), map projections, and why distance calculations need appropriate units. We also introduced sf functions for finding tracts near stations and measuring spatial relationships."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html#key-concepts",
+    "href": "weekly-notes/week-04.html#key-concepts",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "Key Concepts",
+    "text": "Key Concepts\nA GEOID identifies a Census geography. It should be stored as text so leading zeros are preserved. When joining two tables, the GEOID columns need to refer to the same type of geography and use matching values.\nA left_join() keeps every row from the first table and adds matching columns from the second. If a GEOID has no match, the new column contains NA. When the first table is an sf object, its geometry column stays attached.\nsf stands for simple features. An sf table contains ordinary columns plus a geometry column with shapes such as points or polygons.\nA CRS tells R how coordinates relate to places on Earth:\n\n\n\nEPSG\nCRS\nUnits\n\n\n\n\n4326\nWGS 84\nDegrees\n\n\n4269\nNAD 83\nDegrees\n\n\n2272\nPennsylvania South State Plane\nUS survey feet\n\n\n5070\nNAD 83 / Conus Albers\nMeters\n\n\n\nA geographic CRS uses longitude and latitude. A projected CRS represents locations on a flat map, often in feet or meters. Projections involve tradeoffs: one may preserve local shapes, while another preserves areas or distances better for a particular purpose.\nUse st_crs() to check a layer’s CRS. st_set_crs() assigns the correct existing CRS label when it is missing; it does not move coordinates. st_transform() converts coordinates into another CRS. I need to check the units before making a buffer or interpreting a distance.\nSome useful spatial functions are:\n\nst_buffer() creates an area around a feature.\nst_filter() selects features with a spatial relationship, such as tracts that intersect station buffers.\nst_intersection() creates the shared geometry where features overlap.\nst_union() combines geometries into one shape.\nst_join() adds attributes based on a spatial relationship.\nst_distance() calculates distances between features."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html#proving-r-works",
+    "href": "weekly-notes/week-04.html#proving-r-works",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "Proving R Works",
+    "text": "Proving R Works\nThis example joins income data from two years by GEOID. The 2023 table goes first, so all three of its GEOIDs remain. GEOID \"300\" has no 2015 match and receives NA.\n\nlibrary(dplyr)\nlibrary(tibble)\n\nincome_23 &lt;- tibble(\n  GEOID = c(\"100\", \"200\", \"300\"),\n  med_inc_23 = c(82000, 31500, 45000)\n)\n\nincome_15 &lt;- tibble(\n  GEOID = c(\"100\", \"200\", \"400\"),\n  med_inc_15 = c(61000, 27000, 39000)\n)\n\nincome_joined &lt;- left_join(income_23, income_15, by = \"GEOID\")\n\nincome_joined\n\n# A tibble: 3 × 3\n  GEOID med_inc_23 med_inc_15\n  &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;\n1 100        82000      61000\n2 200        31500      27000\n3 300        45000         NA\n\n\nI can check the join by counting rows and missing values:\n\nincome_joined |&gt;\n  summarize(\n    rows = n(),\n    missing_2015_income = sum(is.na(med_inc_15))\n  )\n\n# A tibble: 1 × 2\n   rows missing_2015_income\n  &lt;int&gt;               &lt;int&gt;\n1     3                   1\n\n\nThe result should show 3 rows and 1 missing 2015 income value. This example uses ordinary tables; a spatial version would also have a geometry column."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html#reflection",
+    "href": "weekly-notes/week-04.html#reflection",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "Reflection",
+    "text": "Reflection\nI learned that joining Census data to a map depends on both the table key and the spatial data. A join can run successfully while still leaving unmatched GEOIDs, so I should check the row count and missing values afterward. I also understand why I need to check the CRS before making a half-mile buffer: the number supplied to st_buffer() only makes sense when I know the layer’s distance units."
+  },
+  {
+    "objectID": "weekly-notes/week-04.html#questions-i-still-have",
+    "href": "weekly-notes/week-04.html#questions-i-still-have",
+    "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
+    "section": "Questions I Still Have",
+    "text": "Questions I Still Have\n\nIf Census tract boundaries change between 2015 and 2023, is matching by GEOID alone enough to compare income across years?\nShould a tract count as near a station when any part of it touches a half-mile buffer, or only when its centroid falls inside?\nWhen st_distance() returns distances to many stations, how do I find just the nearest station for each tract?"
   }
 ]

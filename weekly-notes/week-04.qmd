@@ -1,0 +1,112 @@
+---
+title: "Week 4: Spatial Data, Joins, & Coordinate Systems"
+description: "Connecting Census data to maps and measuring spatial relationships."
+date: 2026-09-18
+---
+
+## What We Did
+
+We joined Census income data from different years using GEOID, then learned how
+spatial data stores geometry alongside a table. We discussed coordinate
+reference systems (CRS), map projections, and why distance calculations need
+appropriate units. We also introduced `sf` functions for finding tracts near
+stations and measuring spatial relationships.
+
+## Key Concepts
+
+A **GEOID** identifies a Census geography. It should be stored as text so
+leading zeros are preserved. When joining two tables, the GEOID columns need
+to refer to the same type of geography and use matching values.
+
+A `left_join()` keeps every row from the first table and adds matching columns
+from the second. If a GEOID has no match, the new column contains `NA`. When
+the first table is an `sf` object, its geometry column stays attached.
+
+`sf` stands for **simple features**. An `sf` table contains ordinary columns
+plus a geometry column with shapes such as points or polygons.
+
+A **CRS** tells R how coordinates relate to places on Earth:
+
+| EPSG | CRS | Units |
+|---|---|---|
+| 4326 | WGS 84 | Degrees |
+| 4269 | NAD 83 | Degrees |
+| 2272 | Pennsylvania South State Plane | US survey feet |
+| 5070 | NAD 83 / Conus Albers | Meters |
+
+A geographic CRS uses longitude and latitude. A projected CRS represents
+locations on a flat map, often in feet or meters. Projections involve tradeoffs:
+one may preserve local shapes, while another preserves areas or distances
+better for a particular purpose.
+
+Use `st_crs()` to check a layer's CRS. `st_set_crs()` assigns the **correct
+existing CRS label** when it is missing; it does not move coordinates.
+`st_transform()` converts coordinates into another CRS. I need to check the
+units before making a buffer or interpreting a distance.
+
+Some useful spatial functions are:
+
+- `st_buffer()` creates an area around a feature.
+- `st_filter()` selects features with a spatial relationship, such as tracts
+  that intersect station buffers.
+- `st_intersection()` creates the shared geometry where features overlap.
+- `st_union()` combines geometries into one shape.
+- `st_join()` adds attributes based on a spatial relationship.
+- `st_distance()` calculates distances between features.
+
+## Proving R Works
+
+This example joins income data from two years by GEOID. The 2023 table goes
+first, so all three of its GEOIDs remain. GEOID `"300"` has no 2015 match and
+receives `NA`.
+
+```{r}
+library(dplyr)
+library(tibble)
+
+income_23 <- tibble(
+  GEOID = c("100", "200", "300"),
+  med_inc_23 = c(82000, 31500, 45000)
+)
+
+income_15 <- tibble(
+  GEOID = c("100", "200", "400"),
+  med_inc_15 = c(61000, 27000, 39000)
+)
+
+income_joined <- left_join(income_23, income_15, by = "GEOID")
+
+income_joined
+```
+
+I can check the join by counting rows and missing values:
+
+```{r}
+income_joined |>
+  summarize(
+    rows = n(),
+    missing_2015_income = sum(is.na(med_inc_15))
+  )
+```
+
+The result should show **3 rows** and **1 missing 2015 income value**.
+This example uses ordinary tables; a spatial version would also have a
+geometry column.
+
+## Reflection
+
+I learned that joining Census data to a map depends on both the table key and
+the spatial data. A join can run successfully while still leaving unmatched
+GEOIDs, so I should check the row count and missing values afterward. I also
+understand why I need to check the CRS before making a half-mile buffer:
+the number supplied to `st_buffer()` only makes sense when I know the layer's
+distance units.
+
+## Questions I Still Have
+
+- If Census tract boundaries change between 2015 and 2023, is matching by
+  GEOID alone enough to compare income across years?
+- Should a tract count as near a station when any part of it touches a
+  half-mile buffer, or only when its centroid falls inside?
+- When `st_distance()` returns distances to many stations, how do I find
+  just the nearest station for each tract?
