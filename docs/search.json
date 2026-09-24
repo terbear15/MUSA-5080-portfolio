@@ -116,7 +116,7 @@
     "href": "assignments/index.html",
     "title": "Assignments",
     "section": "",
-    "text": "Completed assignments for MUSA 5080. New assignments appear here automatically once you add the .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nAssignment 2: Who Do We Know the Least About?\n\n\n\n\n\n\n\n\nSep 10, 2026\n\n\n\n\n\nNo matching items"
+    "text": "Completed assignments for MUSA 5080. New assignments appear here automatically once you add the .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nVerify the Claim: Poverty Change in Philadelphia\n\n\n\n\n\n\n\n\nSep 24, 2026\n\n\n\n\n\n\n\nAssignment 2: Who Do We Know the Least About?\n\n\n\n\n\n\n\n\nSep 10, 2026\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
@@ -299,5 +299,19 @@
     "title": "Week 4: Spatial Data, Joins, & Coordinate Systems",
     "section": "Questions I Still Have",
     "text": "Questions I Still Have\n\nIf Census tract boundaries change between 2015 and 2023, is matching by GEOID alone enough to compare income across years?\nShould a tract count as near a station when any part of it touches a half-mile buffer, or only when its centroid falls inside?\nWhen st_distance() returns distances to many stations, how do I find just the nearest station for each tract?"
+  },
+  {
+    "objectID": "assignments/assignment3.html",
+    "href": "assignments/assignment3.html",
+    "title": "Verify the Claim: Poverty Change in Philadelphia",
+    "section": "",
+    "text": "New Census figures on Philly neighborhoods show inequality, high numbers of whites living in poverty"
+  },
+  {
+    "objectID": "assignments/assignment3.html#article",
+    "href": "assignments/assignment3.html#article",
+    "title": "Verify the Claim: Poverty Change in Philadelphia",
+    "section": "",
+    "text": "New Census figures on Philly neighborhoods show inequality, high numbers of whites living in poverty"
   }
 ]
