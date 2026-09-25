@@ -1,5 +1,5 @@
 ---
-title: "Verify the Claim: Poverty Change in Philadelphia"
+title: "Assignment 3: Verify the Claim: Poverty Change in Philadelphia"
 author: "Terry Xu"
 date: 2026-09-24
 format:
