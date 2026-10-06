@@ -1,0 +1,266 @@
+---
+title: "Week 5: Linear Regression for Prediction"
+description: "Building rent models, checking residuals, and testing predictions with cross-validation."
+date: 2026-09-25
+---
+
+## What We Did
+
+We used linear regression to predict median rent across Philadelphia Census
+tracts. We started with median household income as one predictor, then added
+the percentage of renters, educational attainment, and the number of nearby
+Indego stations.
+
+We learned how to interpret regression coefficients, predictions, and
+residuals. We also compared model fit with prediction accuracy using a
+train/test split and cross-validation. Finally, we mapped the residuals to
+see where rents were higher or lower than the model expected.
+
+## Key Concepts
+
+### Outcomes, predictors, and noise
+
+A statistical model can be written as:
+
+$$
+Y = f(X) + \varepsilon
+$$
+
+- $Y$ is the outcome we want to explain or predict, such as median rent.
+- $X$ contains the predictors, such as income or educational attainment.
+- $f(X)$ is the relationship the model tries to learn.
+- $\varepsilon$ represents everything affecting rent that is not captured by
+  the model, including random noise and omitted characteristics.
+
+For a simple linear regression:
+
+$$
+Y = \beta_0 + \beta_1X + \varepsilon
+$$
+
+The fitted prediction is:
+
+$$
+\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1X
+$$
+
+The intercept, $\hat{\beta}_0$, is the predicted outcome when the predictor
+equals zero. The slope, $\hat{\beta}_1$, describes the predicted change in
+the outcome associated with a one-unit increase in the predictor.
+
+### Prediction and inference
+
+Regression output can be read in two different ways:
+
+- **Inference** focuses on $\hat{\beta}$ and asks how a predictor is associated
+  with the outcome.
+- **Prediction** focuses on $\hat{Y}$ and asks how accurately the model can
+  predict an outcome for observations it has not seen.
+
+A coefficient can help prediction without proving causation. For example, the
+number of Indego stations may help predict rent, but the model cannot prove
+that adding a station causes rent to increase. Station locations may represent
+other neighborhood characteristics that the model does not include.
+
+### Fitting a linear model in R
+
+A simple rent model can be fitted with:
+
+```r
+m1 <- lm(med_rent ~ med_inc, data = tracts)
+summary(m1)
+```
+
+The formula can be read as: predict `med_rent` using `med_inc`.
+
+In our class example, the estimated income coefficient was approximately
+`0.0081`. This represents about $0.0081 in additional predicted monthly rent
+for each additional dollar of annual household income. Multiplying by $10,000
+makes the result easier to understand:
+
+$$
+0.0081 \times 10{,}000 = 81
+$$
+
+A tract with $10,000 more in median household income therefore had a predicted
+monthly rent approximately $81 higher.
+
+A small p-value provides evidence that an association is statistically
+detectable. It does not tell us whether the effect is large, whether it is
+causal, or whether the model predicts new observations well.
+
+### Least squares and residuals
+
+Linear regression chooses the line that minimizes the sum of squared errors:
+
+$$
+\sum (Y_i - \hat{Y}_i)^2
+$$
+
+A **residual** is the difference between an observed value and its prediction:
+
+$$
+e_i = Y_i - \hat{Y}_i
+$$
+
+- A positive residual means the actual rent is higher than predicted.
+- A negative residual means the actual rent is lower than predicted.
+- A residual near zero means the prediction is close to the observed rent.
+
+Mapping residuals can reveal spatial patterns. If nearby tracts have similar
+residuals, the model may be missing a location-based characteristic.
+
+### Rigid and flexible models
+
+Models can be arranged from more rigid to more flexible:
+
+| More rigid | Middle | More flexible |
+|---|---|---|
+| Linear regression | Lasso and ridge | Trees |
+| Logistic regression | Random forest | Boosting and neural networks |
+
+Rigid models are usually easier to explain and interpret. Flexible models can
+capture more complicated relationships, but they can be harder to understand
+and may overfit the training data.
+
+A **parametric model**, such as linear regression, assumes a particular
+functional form and estimates a fixed set of parameters. A **nonparametric
+model** makes fewer assumptions about the functional form and can follow more
+complicated patterns in the data.
+
+### Model fit versus prediction
+
+$R^2$ measures how much of the variation in the outcome is explained by the
+model in the data used to fit it. A higher $R^2$ indicates a better in-sample
+fit, but it does not guarantee better predictions for new data.
+
+A train/test split separates the observations into two groups:
+
+- The **training set** is used to fit the model.
+- The **test set** is used to evaluate predictions on unseen observations.
+
+In class, we used approximately 80% of the tracts for training and 20% for
+testing.
+
+Prediction error was measured using root mean squared error:
+
+$$
+RMSE = \sqrt{\frac{1}{n}\sum(Y_i-\hat{Y}_i)^2}
+$$
+
+RMSE is expressed in the same units as the outcome. For a rent model, an RMSE
+of $250 means that predictions miss the observed monthly rent by approximately
+$250. A lower RMSE is better.
+
+### Cross-validation
+
+One train/test split can give different results depending on which observations
+are selected. **K-fold cross-validation** provides a more stable evaluation.
+
+For five-fold cross-validation:
+
+1. Divide the observations into five groups.
+2. Hold out one group as the test set.
+3. Train the model using the other four groups.
+4. Calculate the test RMSE.
+5. Repeat until each group has been used for testing.
+6. Average the five RMSE values.
+
+We used the same folds when comparing models so that the comparison was fair.
+
+This use of **CV** means cross-validation. It is different from the
+**coefficient of variation**, which measures the uncertainty of an ACS
+estimate.
+
+### Regression diagnostics
+
+A good residual plot should look like a random cloud around zero.
+
+**Homoscedasticity** means the residuals have a similar amount of spread across
+the range of predicted values. **Heteroscedasticity** means the spread changes,
+often creating a funnel shape. In that case, one RMSE may hide the fact that
+the model makes much larger errors for some observations.
+
+Noise in the outcome $Y$ becomes part of the residuals. Noise in a predictor
+$X$ can flatten the estimated slope.
+
+**Multicollinearity** occurs when predictors are strongly related to each
+other. It can make individual coefficients unstable and difficult to
+interpret. For a prediction task, the main question is whether the variables
+improve prediction accuracy on unseen data, which can be checked with
+cross-validation.
+
+## Proving R Works
+
+This example creates a small tract-level rent dataset and fits a linear model
+that predicts median rent using median household income.
+
+```{r}
+library(tidyverse)
+
+rent_data <- tibble(
+  GEOID = c("100", "200", "300", "400", "500", "600"),
+  med_rent = c(1050, 1200, 1380, 1500, 1725, 1900),
+  med_inc = c(35000, 48000, 62000, 75000, 92000, 110000),
+  pct_renters = c(71, 65, 59, 54, 48, 42),
+  pct_ba = c(18, 25, 34, 42, 55, 68),
+  n_stations = c(1, 2, 2, 3, 4, 5)
+)
+
+m1 <- lm(med_rent ~ med_inc, data = rent_data)
+
+summary(m1)
+```
+
+I can translate the income coefficient into the predicted rent difference
+associated with a $10,000 income difference:
+
+```{r}
+coef(m1)["med_inc"] * 10000
+```
+
+I can also add each tract's predicted rent and residual:
+
+```{r}
+rent_checked <- rent_data |>
+  mutate(
+    predicted_rent = predict(m1, newdata = rent_data),
+    residual = med_rent - predicted_rent
+  )
+
+rent_checked
+```
+
+Finally, I can calculate the model's RMSE:
+
+```{r}
+sqrt(mean(rent_checked$residual^2))
+```
+
+The residuals show which observations have rents above or below the model's
+expectation. The RMSE summarizes the typical size of these errors in monthly
+rent dollars.
+
+## Reflection
+
+I learned that fitting the data and predicting new observations are related
+but different goals. A model can have a higher $R^2$ because it fits the
+existing observations better, but cross-validation is needed to determine
+whether it also predicts unseen tracts better. I also understand that a
+coefficient describes an association while a residual identifies where the
+actual outcome differs from the model's prediction.
+
+Mapping the residuals was especially useful because it showed that model
+errors may form geographic clusters. If nearby tracts have rents that are
+consistently higher than predicted, the model may be missing a spatial feature
+such as access to Center City, universities, transit, newer housing, or other
+neighborhood amenities.
+
+## Questions I Still Have
+
+- How do I decide whether an improvement in cross-validation RMSE is large
+  enough to justify adding another predictor?
+- If the residual map shows geographic clusters, what spatial variables should
+  I add to the model?
+- When predictors are strongly correlated, how can I tell whether their
+  individual coefficients are still useful to interpret?
