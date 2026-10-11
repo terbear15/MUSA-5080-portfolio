@@ -2,6 +2,7 @@
 title: "Assignment 4: Building Features, Watching What Happens"
 subtitle: "MUSA 5080 · Integrates Weeks 1–5 · Due Friday, October 16"
 author: "Terry Boxuan Xu"
+date: 2026-10-10
 format:
   html:
     toc: true
@@ -31,16 +32,6 @@ You'll:
 
 ### Three rules that apply everywhere
 
-::: {.callout-important}
-## 1. Don't drop rows
-Every model is cross-validated on the same tracts with the same folds, so the rows in your model log are comparable. If a new variable has missing values, fill them (for example, 0 for a count, or the median with a note) or choose a different variable. The `cv_rmse()` helper below will stop and tell you if you break this rule.
-
-## 2. Stay inside the time window
-Your outcome comes from the 2019–2023 ACS. Pull open data from **2023 or earlier** (2021–2023 is ideal). Using 2025 data to predict a 2023 outcome uses information from the future, which a real prediction model would never have.
-
-## 3. No leakage
-Don't use any variable that's built from your outcome or measures the same thing another way. Ask yourself: *would an agency trying to predict this outcome for a tract have this variable?* If the answer is "only because it's basically the outcome," leave it out.
-:::
 
 ---
 
@@ -349,11 +340,6 @@ burglary <- carto_get(
 nrow(burglary)
 ```
 
-::: {.callout-warning}
-## Check for missing geometry
-Some records have no location. Drop them with `filter(!st_is_empty(burglary))`, and count how many you lost. Every point you drop is a point that won't be counted.
-:::
-
 ### Other layers to try
 
 These tables were available on Carto as of this fall. If a query fails, check the dataset's OpenDataPhilly page for the current table name.
@@ -445,11 +431,6 @@ tracts <- tracts %>%
     burglary_per_1k   = n_burglary / total_popE * 1000
   )
 ```
-
-::: {.callout-note}
-## Per capita in low-population tracts
-If a tract has 40 residents and 3 burglaries, its rate is 75 per 1,000, which is a huge number built on tiny counts. Look at the tracts with the highest per-capita rates before you trust them. This is the Week 3 lesson about small denominators again.
-:::
 
 ### 4C: Measuring distance to the nearest thing
 
@@ -550,11 +531,6 @@ Distance to the nearest Indego station helped the most, reducing CV RMSE from 12
 
 So far, every predictor has entered the model as a straight line: each additional unit of X changes predicted Y by the same amount, everywhere. Transformations let the model bend. For prediction, the question is simply **does the bend lower CV RMSE?** For interpretation, each transformation changes what a coefficient means, so you need to know how to read it.
 
-::: {.callout-tip}
-## Transform predictors, not your outcome
-Keep your outcome `y` untransformed in this assignment. If you model `log(y)`, your CV RMSE comes out in log units and can't be compared to the other rows in your log. (Predicting a logged outcome well requires back-transforming, which is an A4 topic.)
-:::
-
 ### 5A: Logs, for skewed predictors
 
 Many urban variables are skewed: a few tracts have huge values, and most have small ones. Income, density, and counts are typical. A log compresses the long tail, so a model can use the difference between 1 and 10 as well as the difference between 100 and 1,000.
@@ -564,11 +540,6 @@ Many urban variables are skewed: a few tracts have huge values, and most have sm
 ggplot(tracts, aes(x = burglary_per_sqmi)) + geom_histogram(bins = 30) + theme_minimal()
 ggplot(tracts, aes(x = log1p(burglary_per_sqmi))) + geom_histogram(bins = 30) + theme_minimal()
 ```
-
-::: {.callout-warning}
-## log(0) doesn't exist
-`log(0)` is `-Inf`, and it will break your model. Counts and densities often include zeros. Use `log1p(x)`, which computes `log(x + 1)`, for anything that can be 0.
-:::
 
 **Reading the coefficient:** when a predictor is logged, a **1% increase** in X goes with a change of about **β/100** in Y, in Y's units. With `log1p`, this reading is approximate for small values of X.
 
@@ -615,11 +586,6 @@ summary(m_cat)
 ```
 
 **Reading the coefficients:** R turns a factor with k categories into k − 1 dummy variables. The category left out is the **reference level** (here, "Core," the first level). Each coefficient is the **difference from the reference**: `ringOuter` is how much higher or lower predicted Y is in outer tracts *compared to core tracts*, holding everything else in the model constant. To change the reference, use `relevel(ring, ref = "Outer")`.
-
-::: {.callout-note}
-## Check your group sizes
-If a category has only a handful of tracts, its coefficient is unstable, and in cross-validation some folds may not contain it at all. Aim for at least 20 tracts per category.
-:::
 
 ### 5D: Your turn
 
@@ -788,8 +754,3 @@ The final residual map shows smaller errors than the baseline map, but errors ar
 Finally, the uncertainty plot shows that prediction errors gradually increase at higher outcome CV values, although only a few tracts have extremely high CVs. Large errors also appear among tracts with relatively reliable estimates. Therefore, ACS uncertainty likely explains part of the remaining error, but the model is also missing neighborhood characteristics that influence whether households own vehicles.
 
 ---
-
-## Submitting
-
-Render this document to HTML and submit the link on Canvas by Friday, October 16. I'll miss you all terribly while I'm away. Please send letters or correspondences to my office mailbox. 
-

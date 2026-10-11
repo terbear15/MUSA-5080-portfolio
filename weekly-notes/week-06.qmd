@@ -1,0 +1,260 @@
+---
+title: "Week 6: Transformations, Categories, Interactions, & Fixed Effects"
+description: "Changing the shape of predictors and testing whether those changes improve prediction."
+date: 2026-10-09
+---
+
+## What We Did
+
+We extended linear regression by changing the form of the variables given to
+the model. We used logs for skewed variables, squared terms for curved
+relationships, categories for meaningful groups, interactions for slopes that
+vary by group, and fixed effects for differences between places.
+
+For every change, the main prediction question stayed the same: did it lower
+cross-validation RMSE? We used the same observations and folds for every model
+so that differences in RMSE came from the features rather than from a different
+sample or a lucky train/test split.
+
+## Key Concepts
+
+### Feature engineering
+
+A linear model can only draw a straight line through the features it receives.
+**Feature engineering** means creating new versions of variables that allow the
+model to represent a different pattern.
+
+| Feature | When it may help | What changes |
+|---|---|---|
+| Log | A variable has a long right tail | Large values are compressed |
+| Squared term | A scatterplot bends | A straight line can become a curve |
+| Category | The variable has meaningful groups or jumps | Groups are compared with a reference |
+| Interaction | A slope differs between groups | Each group can have a different slope |
+| Fixed effect | Unmeasured characteristics differ by place | Each place receives its own intercept |
+
+These changes should be chosen by looking at the data first, not by trying
+transformations at random.
+
+### Logs
+
+A log is useful when a variable is strongly right-skewed. It compresses the
+long tail and treats percentage differences more similarly than equal unit
+differences. For example, an increase from $20,000 to $40,000 is proportionally
+much larger than an increase from $180,000 to $200,000, even though both are a
+$20,000 difference.
+
+If a predictor can equal zero, use:
+
+```r
+log1p(x)
+```
+
+This calculates $\log(x+1)$ because $\log(0)$ is negative infinity and cannot
+be used in a regression.
+
+The interpretation of a coefficient depends on which variables are logged:
+
+| Model form | Interpretation of $\beta$ |
+|---|---|
+| $y \sim x$ | A one-unit increase in $x$ corresponds to $\beta$ units of change in $y$ |
+| $y \sim \log(x)$ | A 1% increase in $x$ corresponds to approximately $\beta/100$ units of change in $y$ |
+| $\log(y) \sim x$ | A one-unit increase in $x$ corresponds to approximately $100\beta$% change in $y$ |
+| $\log(y) \sim \log(x)$ | A 1% increase in $x$ corresponds to approximately $\beta$% change in $y$ |
+
+Logging the outcome changes the units of the residuals. An RMSE measured in
+log units cannot be compared directly with an RMSE measured in dollars. The
+predictions must first be transformed back to the original units with `exp()`.
+
+### Squared terms
+
+A squared term allows a linear model to represent a curve:
+
+$$
+\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1X + \hat{\beta}_2X^2
+$$
+
+In an R formula, the squared term is written with `I()`:
+
+```r
+y ~ x + I(x^2)
+```
+
+`I()` tells R to perform the arithmetic. The linear and squared coefficients
+must be interpreted together:
+
+- Positive linear and negative squared terms: the relationship rises and then
+  levels off or turns downward.
+- Negative linear and positive squared terms: the relationship falls and then
+  levels off or turns upward.
+
+The turning point is:
+
+$$
+-\frac{\beta_1}{2\beta_2}
+$$
+
+The turning point should be checked against the observed range of the data. If
+it falls outside that range, the observed relationship bends but does not
+actually turn. Squared terms can also make unreasonable predictions when used
+far beyond the range of the training data.
+
+### Categorical variables
+
+Categories are useful when a variable already consists of meaningful groups or
+when a numeric relationship changes in jumps instead of smoothly. Categories
+can be created with `case_when()` or `cut()` and should be stored as factors.
+
+```r
+ring = case_when(
+  distance < 2 ~ "Core",
+  distance < 5 ~ "Inner",
+  TRUE         ~ "Outer"
+)
+```
+
+A factor with $k$ categories becomes $k-1$ indicator variables. The omitted
+category is the **reference level**. A coefficient such as `ringOuter` is the
+predicted difference between Outer and the reference group, holding the other
+variables constant. It is not the predicted outcome for Outer by itself.
+
+Changing the reference level changes the comparisons but does not change the
+model's predictions. Before cross-validation, group sizes should be checked;
+very small groups may be missing from a training fold.
+
+Turning a numeric variable into categories also discards information. For
+example, tracts 2.1 and 4.9 miles from City Hall become identical if both are
+placed in the Inner category. Cross-validation shows whether the useful group
+pattern outweighs that loss of detail.
+
+### Interactions
+
+An interaction is useful when the relationship between a predictor and the
+outcome differs between groups. In R:
+
+```r
+y ~ x * group
+```
+
+The `*` includes `x`, `group`, and their interaction `x:group`. The coefficient
+for `x` is the slope for the reference group. The slope for another group is
+the reference slope plus that group's interaction coefficient.
+
+Interactions should have a substantive reason. Crossing every variable with
+every other variable adds many coefficients and can make the model unstable or
+overfit the data.
+
+### Fixed effects
+
+A fixed effect is a categorical variable for a group of observations, often a
+place such as a planning district, neighborhood, or county. It gives each place
+its own intercept and absorbs characteristics that are shared within that
+place but were not measured directly.
+
+Fixed effects can capture reputation, school catchments, transit access,
+history, and other location-based differences. They tell us **where** outcomes
+differ, but not **why** they differ.
+
+After adding fixed effects, another coefficient may change because it is now
+estimated by comparing observations within the same place instead of across
+the entire study area.
+
+Geographic codes must be treated as labels rather than numbers. A district
+code of 18 is not eighteen times district 1, so coded places should be
+converted to factors.
+
+A fixed-effects model cannot estimate an effect for a group it never saw while
+training. For 10-fold cross-validation, each group should ideally have at least
+about 10 observations, and more is safer. Small groups may need to be combined
+with meaningful neighbors or replaced with a coarser geography.
+
+### Using the model log
+
+Every transformed model should be evaluated with the same rows and the same
+cross-validation folds. Some changes will help, some will do almost nothing,
+and others will make prediction worse. That result is the point of maintaining
+a model log.
+
+The best transformation is selected using CV RMSE rather than p-values or
+in-sample $R^2$. A lower CV RMSE means the model predicts unseen observations
+more accurately.
+
+## Proving R Works
+
+This example creates a small dataset and demonstrates logs, squared terms,
+categories, and interactions without downloading external data.
+
+```{r}
+library(tidyverse)
+
+tract_demo <- tibble(
+  tract = sprintf("%03d", 1:15),
+  rent = c(1050, 1120, 1180, 1260, 1350, 1430, 1510, 1580,
+           1640, 1700, 1760, 1810, 1850, 1880, 1900),
+  income = c(28000, 32000, 36000, 41000, 47000, 53000, 60000,
+             68000, 77000, 87000, 98000, 110000, 125000, 142000, 160000),
+  distance = c(0.8, 1.2, 1.7, 2.1, 2.7, 3.2, 3.8, 4.4,
+               5.0, 5.6, 6.3, 7.0, 7.8, 8.7, 9.6),
+  incidents = c(0, 1, 2, 1, 3, 5, 4, 7, 6, 9, 8, 12, 15, 18, 24)
+) |>
+  mutate(
+    log_incidents = log1p(incidents),
+    ring = case_when(
+      distance < 2 ~ "Core",
+      distance < 5 ~ "Inner",
+      TRUE         ~ "Outer"
+    ),
+    ring = factor(ring, levels = c("Core", "Inner", "Outer"))
+  )
+
+tract_demo |>
+  count(ring)
+```
+
+I can fit separate models to test different feature shapes:
+
+```{r}
+m_log <- lm(rent ~ log(income) + log_incidents, data = tract_demo)
+
+m_squared <- lm(
+  rent ~ log(income) + distance + I(distance^2),
+  data = tract_demo
+)
+
+m_category <- lm(rent ~ log(income) + ring, data = tract_demo)
+
+m_interaction <- lm(rent ~ log(income) * ring, data = tract_demo)
+
+coef(m_log)
+coef(m_squared)
+coef(m_category)
+coef(m_interaction)
+```
+
+The category coefficients compare Inner and Outer tracts with Core tracts, the
+reference level. In the interaction model, the income slope for an Outer tract
+is the `log(income)` coefficient plus the `log(income):ringOuter` coefficient.
+
+## Reflection
+
+I learned that feature engineering does not replace a linear model; it changes
+the information and shape given to the model. Logs can make percentage changes
+more meaningful, squared terms allow curves, categories represent groups, and
+interactions allow slopes to vary. Fixed effects can absorb differences between
+places, but they do not explain which neighborhood characteristics caused those
+differences.
+
+I also learned that a transformation that looks better in a graph may not
+predict better. Each model needs to use the same rows and cross-validation
+folds, and the final decision should be based on CV RMSE. Interpretation must
+also match the model form: a logged variable is read in percentages, a squared
+term cannot be read alone, and a categorical coefficient must name its
+reference group.
+
+## Questions I Still Have
+
+- How large must a reduction in CV RMSE be before the added complexity is worth
+  keeping?
+- How should I choose category boundaries without selecting them only because
+  they make the model perform better?
+- When should I use a fixed effect instead of building measurable spatial
+  features for the same places?
