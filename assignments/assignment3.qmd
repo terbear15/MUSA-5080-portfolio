@@ -106,6 +106,9 @@ poverty %>%
 ```
 
 ## Part 2: Testing Poverty Change
+
+I first calculate the poverty rate and its margin of error for each tract in both periods. I also calculate the coefficient of variation (CV), which measures uncertainty relative to the size of the poverty-rate estimate. A lower CV means a more precise estimate.
+
 ```{r}
 #| label: calculate-poverty-rates
 
@@ -146,6 +149,9 @@ poverty %>%
     missing_2017_rate = sum(is.na(poverty_rate_17))
   )
 ```
+The original joined dataset contains 384 census tracts. Seven tracts are missing a usable poverty rate for 2006–2010, and eight are missing one for 2013–2017. Before comparing change, I inspect these tracts to understand why their rates are missing.
+
+The following table shows the population counts used to calculate poverty rates for tracts with missing values. Most of these tracts have a poverty-status population of zero in at least one period, so dividing the number of people in poverty by the population would not produce a meaningful rate.
 ```{r}
 #| label: inspect-missing-rates
 
@@ -163,6 +169,8 @@ poverty %>%
   ) %>%
   print(n = Inf, width = Inf)
 ```
+These tracts include areas with little or no residential population, such as airport or industrial areas. I exclude tracts whose poverty-status population equals zero in either period because their poverty rates cannot be meaningfully calculated or compared.
+
 ```{r}
 #| label: keep-comparable-tracts
 
@@ -174,6 +182,12 @@ poverty_compare <- poverty %>%
 
 nrow(poverty_compare)
 ```
+After removing tracts with zero poverty-status populations, 376 tracts remain. All later comparisons use these same 376 tracts.
+
+For each remaining tract, I subtract the 2006–2010 poverty rate from the
+2013–2017 poverty rate. Positive values indicate estimated increases, while
+negative values indicate estimated decreases. I then combine the margins of
+error from both periods and test whether each change is distinguishable from zero at 90% confidence.
 ```{r}
 #| label: test-poverty-change
 
@@ -196,6 +210,8 @@ poverty_compare <- poverty_compare %>%
 poverty_compare %>%
   count(change_result)
 ```
+The results show 36 tracts with a statistically detectable increase and 27 with a statistically detectable decrease. The other 313 tracts show no detectable change. This does not mean their poverty rates stayed exactly the same; it means the estimated changes were too small relative to their uncertainty to separate from zero.
+
 ```{r}
 #| label: reliability-both-periods
 
@@ -214,13 +230,10 @@ poverty_compare <- poverty_compare %>%
       TRUE ~ "Unreliable"
     )
   )
-
-poverty_compare %>%
-  count(reliability_10)
-
-poverty_compare %>%
-  count(reliability_17)
 ```
+
+The next table evaluates the reliability of the poverty-rate estimates
+themselves. Following the Jurjevich et al. thresholds, estimates with a CV below 12% are reliable, estimates between 12% and 40% are somewhat reliable, and estimates above 40% are unreliable.
 ```{r}
 #| label: reliability-table
 
@@ -265,6 +278,9 @@ reliability_table %>%
     source_note = "Source: ACS 5-year estimates, table B17001. Jurjevich et al. (2018) thresholds: ✓ Reliable, CV < 12%; ~ Somewhat reliable, CV 12–40%; ! Unreliable, CV > 40%."
   )
 ```
+Most tract-level poverty rates fall into the somewhat reliable category. In
+2006–2010, only 11 estimates were reliable, while 321 were somewhat reliable and 44 were unreliable. In 2013–2017, 22 were reliable, 332 were somewhat reliable, and 22 were unreliable. The later period therefore contains fewer unreliable estimates, although most estimates still have noticeable uncertainty.
+
 ```{r}
 #| label: change-error-bars
 #| fig-width: 9
