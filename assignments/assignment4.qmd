@@ -14,25 +14,6 @@ execute:
 freeze: false
 ---
 
-## What this assignment is (and isn't)
-
-This is **not a competition.** There's no leaderboard and no target RMSE. The goal is to practice the full prediction workflow on a question you choose, and to **find out what actually helps.** Some features you're sure will help won't, and some you add on a whim will. Both are findings.
-
-You'll:
-
-1. Choose a tract-level outcome for Philadelphia and check whether it's reliable enough to model (Weeks 2–3).
-2. Fit a baseline model and cross-validate it (Week 5).
-3. Pull data from Philadelphia's open data portal through its API and build spatial features: counts, densities, and distances (Week 4, plus one new tool).
-4. Transform variables with logs, squared terms, and categories. **Watch the October 9 recorded lecture before Part 5.**
-5. Keep a **model log** the whole way through, and compare where your first and final models go wrong.
-
-**Timing.** Parts 1–4 use only what we've covered through Week 5. You can finish them before the October 9 lecture. Part 5 is new material; the lecture explains it, and the instructions below give you the essentials.
-
-**Type the code yourself.** The worked examples show the pattern. Your job is to apply it to your outcome and your data choices.
-
-### Three rules that apply everywhere
-
-
 ---
 
 ## Part 0: Setup
