@@ -1,0 +1,228 @@
+---
+title: "Week 7: Spatial Autocorrelation in Model Errors"
+description: "Using residual maps and Moran's I to find spatial patterns that a prediction model misses."
+date: 2026-10-16
+---
+
+## What We Did
+
+We moved from predicting outcomes for Census tracts to predicting sale prices
+for individual houses. This changed the unit of analysis from polygons to
+points, but many of the spatial tools stayed the same. We counted incidents
+inside buffers, measured distances to nearby features, mapped regression
+residuals, and examined whether nearby houses had similar prediction errors.
+
+We introduced spatial autocorrelation as a model diagnostic. Moran's I puts a
+number on the spatial clustering that we previously looked for by eye in a
+residual map. If nearby houses have similar residuals, the model is probably
+missing something about location.
+
+## Key Concepts
+
+### Residuals and their signs
+
+A residual is the difference between an observed outcome and the model's
+prediction:
+
+$$
+\text{residual} = \text{actual} - \text{predicted}
+$$
+
+- A **positive residual** means the actual price was higher than predicted, so
+  the model underpredicted it.
+- A **negative residual** means the actual price was lower than predicted, so
+  the model overpredicted it.
+- A residual near zero means the prediction was close to the observed value.
+
+A good residual map should look mostly scattered. Clusters of positive or
+negative residuals suggest that the model is repeatedly making the same kind of
+mistake in the same part of the city.
+
+### From tract features to house features
+
+The unit of analysis changed from one row per Census tract to one row per house
+sale. Tracts are polygons, while house sales are points. Spatial features must
+therefore be calculated around each house.
+
+| Spatial feature | Meaning |
+|---|---|
+| Buffer count | Number of features within a chosen distance of a house |
+| Nearest distance | Distance from a house to its nearest feature |
+| k-nearest-neighbor distance | Average distance to the nearest k features |
+| Distance to a landmark | Distance to a place such as City Hall |
+
+For example, a 660-foot buffer can count violent incidents near each house. A
+k-nearest-neighbor measure can calculate the average distance from each house
+to its five nearest incidents. Neither measure is automatically better, so the
+choice should be evaluated with cross-validation RMSE.
+
+### Spatial weights and neighbors
+
+A spatial weights object records which observations count as neighbors and how
+much influence each neighbor receives. With a five-nearest-neighbor definition,
+every house is connected to its five closest houses.
+
+Row-standardized weights use `style = "W"`. The weights for each observation's
+neighbors add to one, so the spatial lag can be read as a neighbor average.
+
+### The spatial lag
+
+A spatial lag summarizes the values found among an observation's neighbors. In
+this lesson, each house received the average residual of its nearest neighbors.
+
+```r
+resid_lag <- lag.listw(weights, residual)
+```
+
+Comparing a house's residual with its neighbors' average residual helps reveal
+whether similar errors occur near one another.
+
+### Moran's I
+
+Moran's I measures spatial autocorrelation: whether nearby observations tend to
+have similar values.
+
+| Moran's I | Spatial pattern | Meaning for model residuals |
+|---|---|---|
+| Near +1 | Similar values cluster | The model may be missing something about place |
+| Near 0 | No clear spatial pattern | Errors are closer to spatial noise |
+| Below 0 | Neighboring values differ | High and low errors tend to be neighbors |
+
+Moran's I asks whether an observation that is above or below average tends to
+have neighbors on the same side of the average. A positive value does not tell
+us which missing feature caused the clustering. It tells us to investigate the
+places where the errors cluster.
+
+### Permutation testing
+
+`moran.mc()` tests whether the observed Moran's I could reasonably appear by
+chance. It repeatedly shuffles the residuals across locations and recalculates
+Moran's I. The p-value is the share of shuffled patterns that are at least as
+extreme as the observed pattern.
+
+With a very large dataset, even a small Moran's I may have a small p-value.
+Therefore, statistical significance is not enough. When improving a prediction
+model, I should also watch whether the size of Moran's I decreases.
+
+### Responding to clustered errors
+
+If the residuals cluster, the pattern may point toward a missing feature:
+
+- A missing amenity or disamenity can become a new spatial predictor.
+- A shared neighborhood characteristic can be represented by a neighborhood
+  fixed effect.
+- A relationship that changes by place may require an interaction.
+
+After adding a feature, the model should be refitted and evaluated again using
+both cross-validation RMSE and Moran's I. RMSE measures prediction error, while
+Moran's I measures whether those errors remain spatially clustered.
+
+### Spatial leakage in prediction
+
+A spatial lag of the outcome uses neighboring outcome values. For house-price
+prediction, that would mean using nearby sale prices to predict another sale
+price. This can create leakage during cross-validation because the training
+data may indirectly reveal information about test observations.
+
+The rule for this prediction workflow is:
+
+> Build spatial features from predictors, not from the outcome.
+
+Crime near a house, distance to transit, and distance to amenities are usable
+predictors. A feature created from neighboring house prices may not be available
+when predicting homes that have not sold and can make test performance look
+unrealistically strong.
+
+## Proving R Works
+
+This example creates nine fictional houses. Houses on the left have positive
+residuals, while houses on the right have negative residuals. I use each
+house's two nearest neighbors to test whether the residuals are spatially
+clustered.
+
+```{r}
+library(tidyverse)
+library(spdep)
+
+houses <- tibble(
+  house = LETTERS[1:9],
+  x = c(1, 1, 1, 2, 2, 2, 3, 3, 3),
+  y = c(1, 2, 3, 1, 2, 3, 1, 2, 3),
+  residual = c(80, 70, 60, 10, 0, -10, -60, -70, -80)
+)
+
+coordinates <- as.matrix(houses[, c("x", "y")])
+
+neighbors <- knn2nb(
+  knearneigh(coordinates, k = 2)
+)
+
+weights <- nb2listw(neighbors, style = "W")
+
+houses <- houses |>
+  mutate(
+    neighbor_residual = lag.listw(weights, residual)
+  )
+
+houses
+```
+
+I can compare each house's residual with the average residual of its neighbors:
+
+```{r}
+ggplot(houses, aes(x = residual, y = neighbor_residual)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  labs(
+    title = "Residuals and Neighboring Residuals",
+    x = "House residual",
+    y = "Average residual of two nearest neighbors"
+  ) +
+  theme_minimal()
+```
+
+Finally, I use a permutation test to calculate Moran's I and its p-value:
+
+```{r}
+set.seed(5080)
+
+moran_result <- moran.mc(
+  houses$residual,
+  weights,
+  nsim = 499
+)
+
+moran_result$statistic
+moran_result$p.value
+```
+
+A positive Moran's I is expected because nearby fictional houses were given
+similar residuals. In a real analysis, this result would be a reason to inspect
+the residual map and develop measurable location features that may explain the
+clusters.
+
+## Reflection
+
+I learned that prediction error is not described completely by a single RMSE.
+Two models could have similar RMSE values while producing very different spatial
+patterns of error. A residual map shows where the model fails, and Moran's I
+shows whether those failures cluster rather than appearing randomly across the
+city.
+
+I also learned that spatial autocorrelation is a diagnostic, not an explanation.
+A positive Moran's I indicates that the model is missing some geographic
+pattern, but it does not identify the cause. I still need to examine the map,
+propose a meaningful spatial feature, refit the model, and check whether both CV
+RMSE and Moran's I improve. For prediction, I must also avoid using neighboring
+outcome values in ways that leak information from the test data.
+
+## Questions I Still Have
+
+- How should I choose the number of nearest neighbors used to build the spatial
+  weights?
+- How much must Moran's I decrease before a new spatial feature should be
+  considered useful?
+- How can cross-validation folds be designed to provide a more realistic test
+  when nearby observations are strongly related?
