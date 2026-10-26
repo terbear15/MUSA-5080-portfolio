@@ -1,0 +1,152 @@
+---
+title: "Week 8: LISA and Spatial Feature Engineering"
+description: "Finding where model errors cluster and creating spatial features to improve predictions."
+date: 2026-10-23
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## What We Did
+
+We moved from Global Moran's I to Local Moran's I, also called LISA.
+Global Moran's I tells us whether model errors are spatially clustered
+overall, while LISA shows where specific clusters and spatial outliers
+are located.
+
+We also compared three ways of measuring proximity: buffer counts,
+distance to the nearest feature, and average distance to the nearest (k)
+features. Finally, we discussed the RealPage rent-pricing case and why
+an accurate model can still create legal, ethical, and social problems.
+
+## Key Concepts
+
+A residual is the difference between the actual and predicted value:
+
+$$\text{Residual} = \text{Actual} - \text{Predicted}$$
+
+A positive residual means the model predicted too low. A negative
+residual means the model predicted too high.
+
+**Global Moran's I** produces one number that answers whether errors are
+spatially clustered. **Local Moran's I**, or LISA, produces one result
+for each observation and shows where clusters are located.
+
+The four LISA categories are:
+
+- **High–High:** A house and its neighbors are underpredicted.
+- **Low–Low:** A house and its neighbors are overpredicted.
+- **High–Low:** An underpredicted house surrounded by overpredicted
+  houses.
+- **Low–High:** An overpredicted house surrounded by underpredicted
+  houses.
+
+High–High and Low–Low are spatial clusters. High–Low and Low–High are
+spatial outliers. Clusters may point to missing neighborhood features,
+while outliers may result from something unusual about an individual
+house.
+
+## Measuring What Is Nearby
+
+There are three common ways to turn proximity into a model feature:
+
+1.  A **buffer count** counts features within a chosen distance.
+2.  A **nearest distance** measures distance to the closest feature.
+3.  A **k-nearest-neighbor distance** averages the distance to the
+    closest (k) features.
+
+The buffer radius and the value of (k) are choices that need to be
+explained. Reasonable alternatives can be compared using
+cross-validation RMSE.
+
+A log transformation can be useful for distance because changing from
+100 to 500 feet may matter more than changing from 5,000 to 5,400 feet.
+
+## Proving R Works
+
+This small example classifies houses into LISA quadrants using each
+house's standardized residual, its neighbors' average residual, and a
+significance level of 0.01.
+
+```{r}
+library(tidyverse)
+
+lisa_example <- tibble(
+  house = c("A", "B", "C", "D", "E"),
+  residual_z = c(84, 64, 4, -66, -86),
+  neighbor_lag = c(64, 44, -1, -41, -66),
+  p_value = c(0.004, 0.008, 0.400, 0.006, 0.002)
+)
+
+lisa_example <- lisa_example %>%
+  mutate(
+    lisa_group = case_when(
+      p_value >= 0.01 ~ "Not significant",
+      residual_z > 0 & neighbor_lag > 0 ~ "High-High",
+      residual_z < 0 & neighbor_lag < 0 ~ "Low-Low",
+      residual_z > 0 & neighbor_lag < 0 ~ "High-Low",
+      TRUE ~ "Low-High"
+    )
+  )
+
+lisa_example
+```
+
+House A is High–High because it has a positive residual and its
+neighbors also have positive residuals. House D is Low–Low because it
+and its neighbors have negative residuals. House C is not significant,
+so there is not enough evidence to treat it as a meaningful spatial
+pattern.
+
+## Improving a Spatial Model
+
+The general process is:
+
+1.  Generate out-of-fold predictions and residuals.
+2.  Check Global Moran's I.
+3.  Make a LISA map.
+4.  Identify significant High–High or Low–Low clusters.
+5.  Ask what spatial feature the model may be missing.
+6.  Add a measurable feature.
+7.  Compare CV RMSE, Moran's I, and the LISA map again.
+
+Lower CV RMSE means better prediction. Moran's I closer to zero means
+the remaining errors are less spatially clustered.
+
+## The RealPage Case
+
+RealPage recommends rents using market information and data supplied by
+landlords. The main controversy is not simply whether its regression
+model is accurate. It concerns the use of competitors' nonpublic rental
+data and how strongly landlords are encouraged to follow the
+recommendations.
+
+The case raises three questions:
+
+1.  What data enters the model, and who supplied it?
+2.  Who acts on the prediction, and can they reject it?
+3.  Who is affected when the prediction is wrong—or when it is accurate?
+
+An accurate prediction of what tenants are willing to pay can still
+contribute to higher rents or unfair coordination.
+
+## Reflection
+
+I learned that Global Moran's I can warn me that errors are clustered,
+but LISA is more useful for identifying the particular places where a
+model is failing. Those clusters can guide feature engineering by
+showing where the model may be missing a neighborhood characteristic.
+
+I also learned that improving predictive accuracy is not the only
+concern. The RealPage example shows that the source of the data, the
+people making decisions from the prediction, and the people affected by
+those decisions are also important.
+
+## Questions I Still Have
+
+- How should I decide whether a LISA cluster is large enough to
+  investigate?
+- How do I choose an appropriate buffer radius or number of nearest
+  neighbors?
+- Can adding a feature improve CV RMSE while making spatial inequality
+  worse?

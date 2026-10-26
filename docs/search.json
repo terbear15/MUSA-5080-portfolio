@@ -158,7 +158,7 @@
     "href": "weekly-notes/index.html",
     "title": "Weekly Notes",
     "section": "",
-    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 7: Spatial Autocorrelation in Model Errors\n\n\nUsing residual maps and Moran’s I to find spatial patterns that a prediction model misses.\n\n\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\nWeek 6: Transformations, Categories, Interactions, & Fixed Effects\n\n\nChanging the shape of predictors and testing whether those changes improve prediction.\n\n\n\n\n\nOct 9, 2026\n\n\n\n\n\n\n\nWeek 5: Linear Regression for Prediction\n\n\nBuilding rent models, checking residuals, and testing predictions with cross-validation.\n\n\n\n\n\nSep 25, 2026\n\n\n\n\n\n\n\nWeek 4: Spatial Data, Joins, & Coordinate Systems\n\n\nConnecting Census data to maps and measuring spatial relationships.\n\n\n\n\n\nSep 18, 2026\n\n\n\n\n\n\n\nWeek 3: Visualization, Geoms, & ggplot2\n\n\nBuilding graphs and showing uncertainty in Census data.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
+    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 8: LISA and Spatial Feature Engineering\n\n\nFinding where model errors cluster and creating spatial features to improve predictions.\n\n\n\n\n\nOct 23, 2026\n\n\n\n\n\n\n\nWeek 7: Spatial Autocorrelation in Model Errors\n\n\nUsing residual maps and Moran’s I to find spatial patterns that a prediction model misses.\n\n\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\nWeek 6: Transformations, Categories, Interactions, & Fixed Effects\n\n\nChanging the shape of predictors and testing whether those changes improve prediction.\n\n\n\n\n\nOct 9, 2026\n\n\n\n\n\n\n\nWeek 5: Linear Regression for Prediction\n\n\nBuilding rent models, checking residuals, and testing predictions with cross-validation.\n\n\n\n\n\nSep 25, 2026\n\n\n\n\n\n\n\nWeek 4: Spatial Data, Joins, & Coordinate Systems\n\n\nConnecting Census data to maps and measuring spatial relationships.\n\n\n\n\n\nSep 18, 2026\n\n\n\n\n\n\n\nWeek 3: Visualization, Geoms, & ggplot2\n\n\nBuilding graphs and showing uncertainty in Census data.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "weekly-notes/week-02.html",
@@ -635,5 +635,68 @@
     "title": "Week 7: Spatial Autocorrelation in Model Errors",
     "section": "Questions I Still Have",
     "text": "Questions I Still Have\n\nHow should I choose the number of nearest neighbors used to build the spatial weights?\nHow much must Moran’s I decrease before a new spatial feature should be considered useful?\nHow can cross-validation folds be designed to provide a more realistic test when nearby observations are strongly related?"
+  },
+  {
+    "objectID": "weekly-notes/week-08.html",
+    "href": "weekly-notes/week-08.html",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "",
+    "text": "We moved from Global Moran’s I to Local Moran’s I, also called LISA. Global Moran’s I tells us whether model errors are spatially clustered overall, while LISA shows where specific clusters and spatial outliers are located.\nWe also compared three ways of measuring proximity: buffer counts, distance to the nearest feature, and average distance to the nearest (k) features. Finally, we discussed the RealPage rent-pricing case and why an accurate model can still create legal, ethical, and social problems."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#what-we-did",
+    "href": "weekly-notes/week-08.html#what-we-did",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "",
+    "text": "We moved from Global Moran’s I to Local Moran’s I, also called LISA. Global Moran’s I tells us whether model errors are spatially clustered overall, while LISA shows where specific clusters and spatial outliers are located.\nWe also compared three ways of measuring proximity: buffer counts, distance to the nearest feature, and average distance to the nearest (k) features. Finally, we discussed the RealPage rent-pricing case and why an accurate model can still create legal, ethical, and social problems."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#key-concepts",
+    "href": "weekly-notes/week-08.html#key-concepts",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Key Concepts",
+    "text": "Key Concepts\nA residual is the difference between the actual and predicted value:\n\\[\\text{Residual} = \\text{Actual} - \\text{Predicted}\\]\nA positive residual means the model predicted too low. A negative residual means the model predicted too high.\nGlobal Moran’s I produces one number that answers whether errors are spatially clustered. Local Moran’s I, or LISA, produces one result for each observation and shows where clusters are located.\nThe four LISA categories are:\n\nHigh–High: A house and its neighbors are underpredicted.\nLow–Low: A house and its neighbors are overpredicted.\nHigh–Low: An underpredicted house surrounded by overpredicted houses.\nLow–High: An overpredicted house surrounded by underpredicted houses.\n\nHigh–High and Low–Low are spatial clusters. High–Low and Low–High are spatial outliers. Clusters may point to missing neighborhood features, while outliers may result from something unusual about an individual house."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#measuring-what-is-nearby",
+    "href": "weekly-notes/week-08.html#measuring-what-is-nearby",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Measuring What Is Nearby",
+    "text": "Measuring What Is Nearby\nThere are three common ways to turn proximity into a model feature:\n\nA buffer count counts features within a chosen distance.\nA nearest distance measures distance to the closest feature.\nA k-nearest-neighbor distance averages the distance to the closest (k) features.\n\nThe buffer radius and the value of (k) are choices that need to be explained. Reasonable alternatives can be compared using cross-validation RMSE.\nA log transformation can be useful for distance because changing from 100 to 500 feet may matter more than changing from 5,000 to 5,400 feet."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#proving-r-works",
+    "href": "weekly-notes/week-08.html#proving-r-works",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Proving R Works",
+    "text": "Proving R Works\nThis small example classifies houses into LISA quadrants using each house’s standardized residual, its neighbors’ average residual, and a significance level of 0.01.\n\nlibrary(tidyverse)\n\nlisa_example &lt;- tibble(\n  house = c(\"A\", \"B\", \"C\", \"D\", \"E\"),\n  residual_z = c(84, 64, 4, -66, -86),\n  neighbor_lag = c(64, 44, -1, -41, -66),\n  p_value = c(0.004, 0.008, 0.400, 0.006, 0.002)\n)\n\nlisa_example &lt;- lisa_example %&gt;%\n  mutate(\n    lisa_group = case_when(\n      p_value &gt;= 0.01 ~ \"Not significant\",\n      residual_z &gt; 0 & neighbor_lag &gt; 0 ~ \"High-High\",\n      residual_z &lt; 0 & neighbor_lag &lt; 0 ~ \"Low-Low\",\n      residual_z &gt; 0 & neighbor_lag &lt; 0 ~ \"High-Low\",\n      TRUE ~ \"Low-High\"\n    )\n  )\n\nlisa_example\n\n# A tibble: 5 × 5\n  house residual_z neighbor_lag p_value lisa_group     \n  &lt;chr&gt;      &lt;dbl&gt;        &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;          \n1 A             84           64   0.004 High-High      \n2 B             64           44   0.008 High-High      \n3 C              4           -1   0.4   Not significant\n4 D            -66          -41   0.006 Low-Low        \n5 E            -86          -66   0.002 Low-Low        \n\n\nHouse A is High–High because it has a positive residual and its neighbors also have positive residuals. House D is Low–Low because it and its neighbors have negative residuals. House C is not significant, so there is not enough evidence to treat it as a meaningful spatial pattern."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#improving-a-spatial-model",
+    "href": "weekly-notes/week-08.html#improving-a-spatial-model",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Improving a Spatial Model",
+    "text": "Improving a Spatial Model\nThe general process is:\n\nGenerate out-of-fold predictions and residuals.\nCheck Global Moran’s I.\nMake a LISA map.\nIdentify significant High–High or Low–Low clusters.\nAsk what spatial feature the model may be missing.\nAdd a measurable feature.\nCompare CV RMSE, Moran’s I, and the LISA map again.\n\nLower CV RMSE means better prediction. Moran’s I closer to zero means the remaining errors are less spatially clustered."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#the-realpage-case",
+    "href": "weekly-notes/week-08.html#the-realpage-case",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "The RealPage Case",
+    "text": "The RealPage Case\nRealPage recommends rents using market information and data supplied by landlords. The main controversy is not simply whether its regression model is accurate. It concerns the use of competitors’ nonpublic rental data and how strongly landlords are encouraged to follow the recommendations.\nThe case raises three questions:\n\nWhat data enters the model, and who supplied it?\nWho acts on the prediction, and can they reject it?\nWho is affected when the prediction is wrong—or when it is accurate?\n\nAn accurate prediction of what tenants are willing to pay can still contribute to higher rents or unfair coordination."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#reflection",
+    "href": "weekly-notes/week-08.html#reflection",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Reflection",
+    "text": "Reflection\nI learned that Global Moran’s I can warn me that errors are clustered, but LISA is more useful for identifying the particular places where a model is failing. Those clusters can guide feature engineering by showing where the model may be missing a neighborhood characteristic.\nI also learned that improving predictive accuracy is not the only concern. The RealPage example shows that the source of the data, the people making decisions from the prediction, and the people affected by those decisions are also important."
+  },
+  {
+    "objectID": "weekly-notes/week-08.html#questions-i-still-have",
+    "href": "weekly-notes/week-08.html#questions-i-still-have",
+    "title": "Week 8: LISA and Spatial Feature Engineering",
+    "section": "Questions I Still Have",
+    "text": "Questions I Still Have\n\nHow should I decide whether a LISA cluster is large enough to investigate?\nHow do I choose an appropriate buffer radius or number of nearest neighbors?\nCan adding a feature improve CV RMSE while making spatial inequality worse?"
   }
 ]
