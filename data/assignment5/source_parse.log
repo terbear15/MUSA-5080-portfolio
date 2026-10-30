@@ -1,0 +1,214 @@
+expression(suppressPackageStartupMessages({
+    library(tidyverse)
+    library(sf)
+    library(spdep)
+}), source("data/assignment5/model_helpers.R", local = TRUE), 
+    features <- readRDS("data/assignment5/features.rds"), reference <- readRDS("references/original_m10/model_results.rds"), 
+    train_raw <- features$train_raw, test_raw <- features$test_raw, 
+    stopifnot(identical(train_raw$id, reference$train$id), identical(test_raw$id, 
+        reference$test$id)), fold_id <- reference$fold_id, stopifnot(all(vapply(split(fold_id, 
+        train_raw$location_id), function(x) length(unique(x)) == 
+        1L, logical(1)))), weights <- reference$weights, moran_i <- function(e) unname(spdep::moran(e, 
+        weights, length(e), Szero(weights))$I), fold_data <- lapply(1:10, 
+        function(k) {
+            recipe <- learn_recipe(train_raw[fold_id != k, ])
+            list(analysis = prepare(train_raw[fold_id != k, ], 
+                recipe), assessment = prepare(train_raw[fold_id == 
+                k, ], recipe), rows = which(fold_id == k))
+        }), recipe_final <- learn_recipe(train_raw), train <- prepare(train_raw, 
+        recipe_final), test <- prepare(test_raw, recipe_final), 
+    f1 <- sale_price ~ building_000sf + age_decade + lotsize_acre + 
+        num_bedrooms + num_full_baths + num_half_baths + num_fireplaces + 
+        garage_size + central_air + one_story + full_basement + 
+        finished_basement + brick_stone_ext + warmairfurnace, 
+    f2 <- update(f1, . ~ . - lotsize_acre + log_lot + I(building_000sf^2) + 
+        I(age_decade^2)), f3 <- update(f2, . ~ . + year_f + quarter_f), 
+    f4 <- update(f3, . ~ . + downtown_mi + I(downtown_mi^2) + 
+        east_mi + north_mi), f5 <- update(f4, . ~ . + model_ward), 
+    f6 <- update(f5, . ~ . + building_000sf:model_ward), f7 <- update(f6, 
+        . ~ . + log_robbery + crime_unavailable), f8 <- update(f7, 
+        . ~ . + robbery_knn5_mi), f9 <- update(f8, . ~ . - robbery_knn5_mi + 
+        log_knn5), f10 <- update(f9, . ~ . + building_000sf:age_decade), 
+    f_ns <- update(f10, . ~ . + lot_zone + log_lot:lot_zone), 
+    formulas <- list(m1 = f1, m2 = f2, m3 = f3, m4 = f4, m5 = f5, 
+        m6 = f6, m7 = f7, m8 = f8, m9 = f9, m10 = f10, E1 = update(f10, 
+            . ~ . - log_lot + lotsize_acre), E2 = update(f10, 
+            . ~ . - log_lot + log1p(lotsize_acre)), E3 = update(f10, 
+            . ~ . + log_lot:model_ward), E4 = update(f10, . ~ 
+            . - I(building_000sf^2)), NS = f_ns, C1 = update(f_ns, 
+            . ~ . + size_band), C2 = update(f_ns, . ~ . + size_band + 
+            size_band:lot_zone), C3 = update(f_ns, . ~ . - age_decade - 
+            I(age_decade^2) - building_000sf:age_decade + age_band), 
+        C4 = update(f_ns, . ~ . + num_full_baths:lot_zone + num_half_baths:lot_zone + 
+            num_bedrooms:lot_zone + garage_size:lot_zone + finished_basement:lot_zone), 
+        C5 = update(f_ns, . ~ . + num_full_baths:model_ward), 
+        C6 = update(f_ns, . ~ . + grid_3mi), C7 = update(f_ns, 
+            . ~ . + grid_2mi), C8 = update(f_ns, . ~ . - log_lot - 
+            log_lot:lot_zone + lot_band + lot_band:lot_zone)), 
+    added <- c("Structure only", "Log lot; size and age quadratics", 
+        "Year and quarter", "Downtown distance and coordinates", 
+        "Ward fixed effects", "Area by Ward", "Log robbery count", 
+        "Nearest-five robbery distance", "Log robbery distance", 
+        "Area by age", "Replace log lot with raw lot", "Replace log lot with log1p(lot)", 
+        "Log lot by Ward", "Remove area quadratic", "North/South log-lot slopes", 
+        "Size categories", "Size categories by North/South", 
+        "Age categories replace age curve", "Amenities by North/South", 
+        "Bathrooms by Ward", "3-mile cell fixed effects", "2-mile cell fixed effects", 
+        "Lot categories by North/South"), notes <- c("Establish a house-characteristic baseline.", 
+        "Allow curvature and reduce skew in lot size.", "Represent market time and seasonality.", 
+        "Represent broad geographic price gradients.", "Capture shared local price differences.", 
+        "Allow extra floor space to carry different values by Ward.", 
+        "Measure recent nearby robbery exposure.", "Distinguish places with zero nearby incidents.", 
+        "Test a diminishing-distance relationship.", "Allow area value to vary with building age.", 
+        "Earlier sensitivity check: avoid an unbounded small-lot log adjustment.", 
+        "Earlier sensitivity check: soften the small-lot transformation.", 
+        "Earlier sensitivity check: allow finer geographic lot slopes.", 
+        "Earlier sensitivity check: test whether the area curve creates implausible predictions.", 
+        "Allow broad geographic heterogeneity in the lot-size relationship.", 
+        "Address overvaluation among small houses.", "Allow small-house adjustments to vary geographically.", 
+        "Check sensitivity to the sparse old-house tail.", "Allow location-specific amenity premiums.", 
+        "Test a geographically varying bathroom premium.", "Address residual clusters using additional categorical place effects.", 
+        "Compare a smaller pre-specified place unit.", "Test grouped lot area without the log-lot tail."), 
+    stopifnot(length(formulas) == length(added), length(added) == 
+        length(notes)), model_log <- tibble(), fold_scores <- tibble(), 
+    income_metrics <- tibble(), oof <- list(), test_predictions <- list(), 
+    all_coefficients <- list(), income_group <- cut(train$income, 
+        c(-Inf, 50000, 75000, 1e+05, Inf), labels = c("Under $50k", 
+            "$50k-75k", "$75k-100k", "$100k+")), writeLines("Formal model refit: 23 specifications on identical folds.", 
+        "data/assignment5/formal_fit.log"), for (j in seq_along(formulas)) {
+        name <- names(formulas)[j]
+        formula <- formulas[[j]]
+        stopifnot(identical(formula[[2]], as.name("sale_price")))
+        p <- rep(NA_real_, nrow(train))
+        scores <- numeric(10)
+        for (k in 1:10) {
+            d <- fold_data[[k]]
+            fit <- lm(formula, d$analysis, na.action = na.fail)
+            stopifnot(fit$rank == length(coef(fit)))
+            p[d$rows] <- as.numeric(predict(fit, d$assessment))
+            scores[k] <- sqrt(mean((d$assessment$sale_price - 
+                p[d$rows])^2))
+        }
+        full_fit <- lm(formula, train, na.action = na.fail)
+        stopifnot(full_fit$rank == length(coef(full_fit)), all(is.finite(p)))
+        tp <- as.numeric(predict(full_fit, test))
+        stopifnot(all(is.finite(tp)))
+        if (name == "C6") 
+            m_final <- full_fit
+        e <- train$sale_price - p
+        inc <- tibble(income_group, pred = p, ratio = p/train$sale_price, 
+            residual = e) %>% filter(!is.na(income_group)) %>% 
+            group_by(income_group) %>% summarize(n = n(), median_ratio = median(ratio), 
+            mean_ratio = mean(ratio), share_overvalued = mean(ratio > 
+                1), rmse = sqrt(mean(residual^2)), mean_residual = mean(residual), 
+            negative = sum(pred < 0), .groups = "drop") %>% mutate(model = name, 
+            .before = 1)
+        low <- inc %>% filter(income_group == "Under $50k")
+        high <- inc %>% filter(income_group == "$100k+")
+        model_log <- bind_rows(model_log, tibble(model = name, 
+            added = added[j], cv_rmse = mean(scores), pooled_oof_rmse = sqrt(mean(e^2)), 
+            moran_i = moran_i(e), notes = notes[j], oof_negative = sum(p < 
+                0), test_negative = sum(tp < 0), test_min = min(tp), 
+            low_income_median_ratio = low$median_ratio, low_income_mean_ratio = low$mean_ratio, 
+            low_income_overvalued = low$share_overvalued, high_income_median_ratio = high$median_ratio, 
+            income_ratio_gap = low$median_ratio - high$median_ratio, 
+            parameters = length(coef(full_fit)), selected = name == 
+                "C6"))
+        income_metrics <- bind_rows(income_metrics, inc)
+        fold_scores <- bind_rows(fold_scores, tibble(model = name, 
+            fold = 1:10, rmse = scores))
+        oof[[name]] <- p
+        test_predictions[[name]] <- tp
+        all_coefficients[[name]] <- enframe(coef(full_fit), "term", 
+            "estimate")
+        progress <- sprintf("%s: CV RMSE %.2f; Moran I %.6f; negatives %d/%d; low-income ratio %.4f", 
+            name, mean(scores), tail(model_log$moran_i, 1), sum(p < 
+                0), sum(tp < 0), low$median_ratio)
+        cat(progress, "\n")
+        cat(progress, "\n", file = "data/assignment5/formal_fit.log", 
+            append = TRUE)
+    }, final_name <- "C6", f_final <- formulas[[final_name]], 
+    stopifnot(max(abs(oof$m10 - reference$diagnostics$pred_final)) < 
+        1e-05), ns_reference <- read_csv("experiments/north_south_lot/results/out_of_fold_comparison.csv", 
+        show_col_types = FALSE) %>% filter(model == "north_south_lot"), 
+    trial_reference <- readRDS("experiments/course_feature_trials/results/trial_predictions.rds"), 
+    stopifnot(identical(ns_reference$id, train$id), max(abs(oof$NS - 
+        ns_reference$pred)) < 1e-05, max(abs(oof$C6 - trial_reference$oof$ns_grid_3mi)) < 
+        1e-05, max(abs(test_predictions$C6 - trial_reference$test$ns_grid_3mi)) < 
+        1e-05), preds <- tibble(id = test$id, pred = test_predictions[[final_name]]), 
+    stopifnot(identical(preds$id, read_csv("chicago_test.csv", 
+        show_col_types = FALSE)$id), nrow(preds) == 5789L, !anyDuplicated(preds$id), 
+        all(is.finite(preds$pred))), diagnostics <- train_raw %>% 
+        mutate(fold = fold_id, pred_baseline = oof$m1, pred_original = oof$m10, 
+            pred_ns = oof$NS, pred_final = oof$C6, residual_baseline = sale_price - 
+                pred_baseline, residual_original = sale_price - 
+                pred_original, residual_ns = sale_price - pred_ns, 
+            residual_final = sale_price - pred_final, ratio = pred_final/sale_price, 
+            income_group = income_group), selected_models <- c("m1", 
+        "m10", "NS", "C6", "C7", "E3"), comparison <- model_log %>% 
+        filter(model %in% selected_models), negative_test <- test %>% 
+        select(id, ward, lotsize_acre, building_000sf, building_age, 
+            is_multisale) %>% mutate(pred_original = test_predictions$m10, 
+        pred_ns = test_predictions$NS, pred_final = test_predictions$C6) %>% 
+        filter(pred_final < 0), write_csv(model_log, "data/assignment5/model_log.csv"), 
+    write_csv(fold_scores, "data/assignment5/fold_scores.csv"), 
+    write_csv(income_metrics, "data/assignment5/income_group_metrics.csv"), 
+    write_csv(comparison, "data/assignment5/model_comparison.csv"), 
+    write_csv(negative_test, "data/assignment5/negative_test_predictions.csv"), 
+    write_csv(st_drop_geometry(diagnostics), "data/assignment5/out_of_fold_predictions.csv"), 
+    write_csv(all_coefficients[[final_name]], "data/assignment5/final_coefficients.csv"), 
+    write_csv(recipe_final$grid_3mi$cells, "data/assignment5/grid_3mi_recipe.csv"), 
+    write_csv(preds, "team_Mahjong_predictions.csv"), write_csv(preds, 
+        "assignment5_predictions.csv"), saveRDS(list(model_log = model_log, 
+        fold_scores = fold_scores, formulas = formulas, final_name = final_name, 
+        f_final = f_final, m_final = m_final, recipe_final = recipe_final, 
+        fill_final = recipe_final$fill, diagnostics = diagnostics, 
+        train = train, test = test, preds = preds, fold_id = fold_id, 
+        weights = weights, oof = oof, test_predictions = test_predictions, 
+        income_metrics = income_metrics, coefficients = all_coefficients, 
+        original_reference = "references/original_m10/model_results.rds"), 
+        "data/assignment5/model_results.rds"), cat("Final adopted model: C6 (North/South plus 3-mile cell fixed effects).\n"))
+expression(learn_grid <- function(data, width, min_n = 80L) {
+    cells <- tibble(gx = floor(data$east_mi/width), gy = floor(data$north_mi/width)) %>% 
+        count(gx, gy) %>% filter(n >= min_n) %>% arrange(gx, 
+        gy) %>% mutate(key = paste(gx, gy, sep = "/"), east = (gx + 
+        0.5) * width, north = (gy + 0.5) * width)
+    stopifnot(nrow(cells) > 0)
+    list(width = width, min_n = min_n, cells = cells)
+}, apply_grid <- function(data, recipe) {
+    centers <- recipe$cells
+    key <- paste(floor(data$east_mi/recipe$width), floor(data$north_mi/recipe$width), 
+        sep = "/")
+    index <- match(key, centers$key)
+    missing <- which(is.na(index))
+    if (length(missing)) {
+        distance_squared <- outer(data$east_mi[missing], centers$east, 
+            "-")^2 + outer(data$north_mi[missing], centers$north, 
+            "-")^2
+        index[missing] <- max.col(-distance_squared, ties.method = "first")
+    }
+    factor(centers$key[index], levels = centers$key)
+}, impute_vars <- c("lotsize_acre", "num_half_baths", "num_fireplaces", 
+    "garage_size", "full_basement", "warmairfurnace", "robbery_660ft", 
+    "robbery_knn5_mi"), learn_recipe <- function(data) {
+    data <- st_drop_geometry(data)
+    list(fill = vapply(data[impute_vars], median, numeric(1), 
+        na.rm = TRUE), grid_3mi = learn_grid(data, 3), grid_2mi = learn_grid(data, 
+        2))
+}, prepare <- function(data, recipe) {
+    data <- st_drop_geometry(data)
+    for (v in names(recipe$fill)) data[[v]][is.na(data[[v]])] <- recipe$fill[[v]]
+    data %>% mutate(age_decade = building_age/10, log_lot = log(lotsize_acre), 
+        log_robbery = log1p(robbery_660ft), log_knn5 = log1p(robbery_knn5_mi), 
+        lot_zone = factor(if_else(north_mi >= 0, "North", "South"), 
+            levels = c("North", "South")), size_band = cut(building_000sf, 
+            c(0, 1, 1.5, 2.5, Inf), include.lowest = TRUE, labels = c("Up to 1000", 
+                "1000-1500", "1500-2500", "Over 2500")), age_band = cut(building_age, 
+            c(-Inf, 30, 60, 90, 120, Inf), labels = c("Up to 30", 
+                "31-60", "61-90", "91-120", "Over 120")), lot_band = cut(lotsize_acre, 
+            c(0, 0.025, 0.05, 0.1, 0.2, Inf), include.lowest = TRUE, 
+            labels = c("Up to .025", ".025-.05", ".05-.10", ".10-.20", 
+                "Over .20")), grid_3mi = apply_grid(data, recipe$grid_3mi), 
+        grid_2mi = apply_grid(data, recipe$grid_2mi))
+})
+Formal R sources parse successfully.

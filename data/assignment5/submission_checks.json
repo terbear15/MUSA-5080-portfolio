@@ -1,0 +1,49 @@
+{
+  "checks": {
+    "active_branch_is_dev": true,
+    "main_not_merged_or_moved": true,
+    "original_m10_archive_intact": true,
+    "all_comparison_artifacts_intact": true,
+    "prediction_schema": true,
+    "all_5789_test_ids_in_original_order": true,
+    "unique_ids_and_finite_predictions": true,
+    "convenience_csv_identical": true,
+    "verified_model_is_adopted_NS": true,
+    "model_object_matches_verified_file": true,
+    "csv_matches_verified_model_export": true,
+    "all_15_reported_models_logged": true,
+    "log_has_reasons_rmse_and_moran": true,
+    "NS_explicitly_selected": true,
+    "ten_folds_per_model_and_consistent_rmse": true,
+    "all_retained_training_rows_have_oof_predictions": true,
+    "pooled_rmse_recomputed": true,
+    "low_income_metrics_recomputed": true,
+    "remaining_negative_disclosed": true,
+    "required_report_sections": true,
+    "four_exploration_plots": true,
+    "reflection_about_300_words": true,
+    "seven_embedded_report_figures": true,
+    "html_is_current_english_team_report": true,
+    "no_later_models_in_formal_report": true,
+    "annotated_NS_formula_in_report": true,
+    "team_filename_in_report": true
+  },
+  "all_checks_passed": true,
+  "summary": {
+    "final_model": "NS",
+    "cv_rmse": 179512.1571931076,
+    "pooled_oof_rmse": 180384.69928744857,
+    "moran_i": 0.16415399576835984,
+    "test_rows": 5789,
+    "test_negative": 2,
+    "oof_negative": 10,
+    "low_income_median_ratio": 1.1462171561981542,
+    "reflection_words": 300,
+    "preserved_artifacts": 58
+  },
+  "human_steps_remaining": [
+    "Each member verifies the allocated review responsibilities and understands the full model.",
+    "Each member renders/publishes the report on their own portfolio and submits that URL to Canvas.",
+    "One member uploads team_Mahjong_predictions.csv by the Canvas deadline."
+  ]
+}

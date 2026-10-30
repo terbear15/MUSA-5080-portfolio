@@ -1,0 +1,94 @@
+During startup - Warning messages:
+1: Setting LC_COLLATE=C.UTF-8 failed 
+2: Setting LC_CTYPE=C.UTF-8 failed 
+3: Setting LC_MONETARY=C.UTF-8 failed 
+4: Setting LC_TIME=C.UTF-8 failed 
+
+
+processing file: assign5.qmd
+1/43                        
+2/43 [setup]                
+3/43                        
+4/43 [prepare-and-fit]      
+5/43                        
+6/43 [cleaning-log]         
+7/43                        
+8/43 [price-distribution]   
+9/43                        
+10/43 [price-map]            
+11/43                        
+12/43 [size-price]           
+13/43                        
+14/43 [age-price]            
+15/43                        
+16/43 [original-model-log]   
+17/43                        
+18/43 [alternative-model-log]
+19/43                        
+20/43 [comparison-table]     
+21/43                        
+22/43 [final-formula]        
+23/43                        
+24/43 [selected-coefficients]
+25/43                        
+26/43 [residual-maps]        
+27/43                        
+28/43 [geographic-errors]    
+29/43                        
+30/43 [largest-errors]       
+31/43                        
+32/43 [observed-predicted]   
+33/43                        
+34/43 [income-summary]       
+35/43                        
+36/43 [income-ratios]        
+37/43                        
+38/43 [cleaning-by-income]   
+39/43                        
+40/43 [predict-test]         
+41/43                        
+42/43 [negative-test-case]   
+43/43                        
+output file: assign5.knit.md
+
+pandoc 
+  to: html
+  output-file: assign5.html
+  standalone: true
+  embed-resources: true
+  section-divs: true
+  html-math-method: mathjax
+  wrap: none
+  default-image-extension: png
+  toc: true
+  
+metadata
+  document-css: false
+  link-citations: true
+  date-format: long
+  lang: en
+  title: 'Assignment 5: House Price Prediction, Chicago'
+  subtitle: MUSA 5080 · Team Mahjong · North/South model
+  author: 'Team Mahjong: Chenyan Zhao, Peirong Luo, Terry Xu, Xuanyu Zhou'
+  date: last-modified
+  theme: flatly
+  code-summary: Show code
+  
+[WARNING] Could not fetch resource https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap: HttpExceptionRequest Request {
+    host                 = "fonts.googleapis.com"
+    port                 = 443
+    secure               = True
+    requestHeaders       = [("User-Agent","pandoc/3.10")]
+    path                 = "/css2"
+    queryString          = "?family=Lato:ital,wght@0,400;0,700;1,400&display=swap"
+    method               = "GET"
+    proxy                = Nothing
+    rawBody              = False
+    redirectCount        = 10
+    responseTimeout      = ResponseTimeoutDefault
+    requestVersion       = HTTP/1.1
+    proxySecureMode      = ProxySecureWithConnect
+  }
+   (ConnectionFailure user error (Network.Socket.gai_strerror not supported: 11001))
+Output created: assign5.html
+

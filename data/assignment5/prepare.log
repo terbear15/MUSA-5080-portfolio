@@ -1,0 +1,16 @@
+Warning message:
+st_point_on_surface assumes attributes are constant over geometries 
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+projected points
+Feature rows: 28989 Training: 21968 Test: 5789 
+Ward matches repaired: 31 Max gap (ft): 524.8858 
+Missing income: 71 

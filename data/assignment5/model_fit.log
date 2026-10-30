@@ -1,0 +1,12 @@
+projected points
+m1 CV RMSE: 281467.7 Moran I: 0.3773 
+m2 CV RMSE: 267870.4 Moran I: 0.4164 
+m3 CV RMSE: 267063 Moran I: 0.4189 
+m4 CV RMSE: 235864.2 Moran I: 0.3982 
+m5 CV RMSE: 196399.5 Moran I: 0.2043 
+m6 CV RMSE: 182388.6 Moran I: 0.1699 
+m7 CV RMSE: 182372.6 Moran I: 0.1696 
+m8 CV RMSE: 182297.1 Moran I: 0.1688 
+m9 CV RMSE: 182235.5 Moran I: 0.1683 
+m10 CV RMSE: 181295.3 Moran I: 0.171 
+Final model: m10 

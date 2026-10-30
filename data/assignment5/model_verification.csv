@@ -1,0 +1,12 @@
+check,value
+final_model,NS
+response,sale_price
+full_rank,TRUE
+coefficients,124
+finite_test_predictions,5789
+negative_test_predictions,2
+predict_max_difference,4.65661287307739e-10
+trial_max_difference,0
+model_file_md5,ce5b7e5a02e738e81584ff9d0d120651
+team_file_md5,7975c65a67695bdd0f3e1f91cbc2af1e
+alias_file_md5,7975c65a67695bdd0f3e1f91cbc2af1e

@@ -1,0 +1,16 @@
+model,added,notes
+m1,House characteristics,Establish a baseline using house characteristics.
+m2,Lot-area transformation and squared terms,Test nonlinear area and age effects.
+m3,Sale year and quarter,Account for market changes and seasonality.
+m4,Distance to downtown and coordinates,Capture the citywide location pattern.
+m5,Ward fixed effects,Capture price differences between Wards.
+m6,Area effect by Ward,Test whether the value of extra space differs by Ward.
+m7,Nearby robbery count,Test the association with nearby robberies.
+m8,Distance to five nearest robberies,Measure proximity where the nearby count is zero.
+m9,Transformed robbery distance,Test a nonlinear relationship with robbery distance.
+m10,Area-by-age interaction,Test whether the area effect changes with age.
+E1,Untransformed lot area,Check whether raw lot area reduces negative predictions.
+E2,Alternative lot-area transformation,Use a less steep transformation for small lots.
+E3,Lot-area effect by Ward,Test whether the lot-area effect differs by Ward.
+E4,Remove the area squared term,Check the influence of the area squared term.
+NS,Lot-area effect by North/South region,Test whether lot area has different effects in the two regions.

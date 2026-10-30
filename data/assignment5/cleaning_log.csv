@@ -1,0 +1,5 @@
+rule,reason,removed,remaining
+"Price at or below $10,000",Remove nominal transfers,0,23200
+Multiple-property sale,Price covers more than one property,1232,21968
+Invalid building area,Require a positive residential building area,0,21968
+Missing coordinates,Require a location,0,21968

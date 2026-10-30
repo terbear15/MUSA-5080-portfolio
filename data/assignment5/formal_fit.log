@@ -1,0 +1,16 @@
+Refit m1-m10, E1-E4 and NS on the original ten folds.
+m1: CV RMSE 281467.66; Moran I 0.377272; negatives 146/34; low-income ratio 1.6066 
+m2: CV RMSE 267870.37; Moran I 0.416353; negatives 0/0; low-income ratio 1.7510 
+m3: CV RMSE 267063.01; Moran I 0.418868; negatives 0/0; low-income ratio 1.7351 
+m4: CV RMSE 235864.18; Moran I 0.398184; negatives 127/36; low-income ratio 1.3075 
+m5: CV RMSE 196399.49; Moran I 0.204271; negatives 150/35; low-income ratio 1.0789 
+m6: CV RMSE 182388.63; Moran I 0.169907; negatives 61/12; low-income ratio 1.1274 
+m7: CV RMSE 182372.56; Moran I 0.169559; negatives 61/11; low-income ratio 1.1280 
+m8: CV RMSE 182297.08; Moran I 0.168835; negatives 59/11; low-income ratio 1.1274 
+m9: CV RMSE 182235.51; Moran I 0.168275; negatives 56/11; low-income ratio 1.1256 
+m10: CV RMSE 181295.29; Moran I 0.171049; negatives 56/12; low-income ratio 1.1324 
+E1: CV RMSE 183012.65; Moran I 0.174389; negatives 12/1; low-income ratio 1.1356 
+E2: CV RMSE 182845.08; Moran I 0.174274; negatives 13/2; low-income ratio 1.1334 
+E3: CV RMSE 175758.39; Moran I 0.145130; negatives 8/6; low-income ratio 1.1422 
+E4: CV RMSE 180115.88; Moran I 0.170149; negatives 64/13; low-income ratio 1.1332 
+NS: CV RMSE 179512.16; Moran I 0.164154; negatives 10/2; low-income ratio 1.1462 
