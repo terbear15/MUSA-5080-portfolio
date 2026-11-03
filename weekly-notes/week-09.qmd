@@ -1,0 +1,182 @@
+---
+title: "Week 9: Predictive Policing, Counts, and Dirty Data"
+description: "Using fishnets and Poisson regression while questioning what police records actually measure."
+date: 2026-10-30
+---
+
+## What We Did
+
+We studied how spatial models can predict crime counts and why police records
+do not necessarily represent all crime that occurs. We created a fishnet grid,
+counted burglaries inside each cell, and learned why Poisson regression is more
+appropriate than ordinary linear regression for count outcomes.
+
+We also discussed dirty data, feedback loops, data leakage, and why a model can
+produce accurate predictions while still reinforcing harmful policing patterns.
+
+## Key Concepts
+
+A **fishnet** is a grid of equally sized cells placed over a study area. It
+provides a consistent spatial unit for counting incidents. Census tracts may be
+less appropriate because they differ in size and were designed around
+population rather than crime.
+
+The size of a fishnet cell depends on the coordinate reference system. In EPSG
+2272, this code creates cells measuring 500 feet by 500 feet:
+
+```r
+st_make_grid(philly, cellsize = 500)
+```
+
+Changing boundaries or spatial units can change the observed pattern. This is
+called the **modifiable areal unit problem**, or MAUP.
+
+## Modeling Counts
+
+Crime counts are whole numbers that cannot be negative. They also commonly
+contain many zeros. Ordinary linear regression is not ideal because it can
+predict negative counts and assumes a constant error spread.
+
+Poisson regression models the expected count:
+
+$$
+\log(\lambda) = \beta_0 + \beta_1X
+$$
+
+$$
+\lambda = e^{\beta_0 + \beta_1X}
+$$
+
+The exponential transformation keeps the predicted count positive. In R, a
+Poisson model is fitted with:
+
+```r
+glm(formula, family = "poisson", data = data)
+```
+
+When making predictions, `type = "response"` returns expected counts instead
+of log-counts:
+
+```r
+predict(model, type = "response")
+```
+
+To interpret a Poisson coefficient, calculate \(e^\beta\). For example, if
+\(e^\beta = 1.22\), a one-unit increase in the predictor is associated with
+22% more expected incidents.
+
+Poisson regression assumes that the outcome's mean and variance are equal. If
+the variance is much larger than the mean, the data have **overdispersion**.
+Negative binomial regression can handle this additional variation.
+
+## Spatial Features and Leakage
+
+The four spatial feature types introduced in class were:
+
+- A count inside each cell
+- Distance to the nearest feature
+- Average distance to the nearest \(k\) features
+- Distance to a fixed location
+
+The model used 2024 information to create predictors and attempted to predict
+2025 burglaries. Using 2025 burglary hotspots to predict 2025 burglaries would
+be data leakage because the model would use information from the outcome it is
+supposed to predict.
+
+## Dirty Data and Feedback Loops
+
+Police records are created through several steps:
+
+$$
+\text{Recorded crime}
+=
+\text{Actual crime}
+\times P(\text{reported})
+\times P(\text{recorded}\mid\text{reported})
+$$
+
+Not every crime is reported, and not every report is recorded in the same way.
+Dirty data can include missing records, manipulated classifications, biased
+arrests, racial profiling, and records produced through unlawful practices.
+
+A predictive-policing feedback loop can occur when:
+
+1. A model identifies a neighborhood as high risk.
+2. More police are sent there.
+3. More incidents and arrests are recorded.
+4. The additional records appear to confirm the model.
+5. Even more police are sent there.
+
+Cross-validation cannot identify this problem if the same bias appears in both
+the training and testing data. A low RMSE may mean that the model predicts
+police records well, not that it predicts actual crime accurately.
+
+## Proving R Works
+
+This example creates a small cell-level dataset and fits a Poisson model to
+predict burglary counts.
+
+```{r}
+library(tidyverse)
+
+crime_cells <- tibble(
+  cell_id = 1:10,
+  abandoned_cars = c(0, 1, 0, 2, 1, 3, 2, 4, 3, 5),
+  distance_center = c(5.0, 4.5, 4.0, 3.5, 3.0,
+                      2.5, 2.0, 1.5, 1.0, 0.5),
+  burglaries = c(0, 0, 0, 1, 0, 1, 2, 1, 3, 4)
+)
+
+poisson_model <- glm(
+  burglaries ~ abandoned_cars + distance_center,
+  family = "poisson",
+  data = crime_cells
+)
+
+crime_cells <- crime_cells %>%
+  mutate(
+    predicted_burglaries = predict(
+      poisson_model,
+      type = "response"
+    )
+  )
+
+crime_cells
+```
+
+The predictions are expected counts, so they can contain decimals even though
+the recorded burglary counts are whole numbers. Unlike OLS predictions, the
+Poisson predictions cannot be negative.
+
+We can also compare the mean and variance of the outcome:
+
+```{r}
+crime_cells %>%
+  summarize(
+    mean_burglaries = mean(burglaries),
+    variance_burglaries = var(burglaries)
+  )
+```
+
+If the variance is much larger than the mean, a negative binomial model may be
+more appropriate.
+
+## Reflection
+
+I learned that selecting the correct model depends on the type of outcome.
+Poisson regression is more appropriate for nonnegative count data than OLS,
+but choosing the correct statistical model does not solve problems in the
+underlying data.
+
+The predictive-policing example showed that police records reflect reporting,
+recording, and patrol decisions in addition to actual crime. A model can
+therefore reproduce earlier policing patterns and still receive a good
+cross-validation score. Technical accuracy does not automatically mean that a
+model is fair or appropriate for making policy decisions.
+
+## Questions I Still Have
+
+- How much overdispersion is enough to require negative binomial regression?
+- How should the fishnet cell size be selected?
+- How can a model be evaluated when the true amount of crime is not completely
+  observed?
