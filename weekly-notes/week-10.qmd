@@ -1,0 +1,208 @@
+---
+title: "Week 10: Geographic Cross-Validation and Logistic Regression"
+description: "Predicting binary outcomes and turning probabilities into policy decisions."
+date: 2026-11-06
+---
+
+## What We Did
+
+We learned how geographic cross-validation provides a more realistic test for
+spatial models. We then introduced logistic regression for outcomes with two
+possibilities, such as whether a person is rearrested within two years.
+
+We converted probabilities into odds and log-odds, interpreted odds ratios,
+and used classification thresholds to turn predicted probabilities into
+yes-or-no decisions.
+
+## Geographic Cross-Validation
+
+Random cross-validation may place nearby observations in both the training and
+testing sets. Because nearby places often have similar features and outcomes,
+the model may have effectively seen the answer next door. This is called
+**proximity leakage**.
+
+Geographic cross-validation holds out an entire area, such as one police
+district:
+
+1. Train the model on every other district.
+2. Predict the held-out district.
+3. Calculate the prediction error.
+4. Repeat for each district.
+
+This tests whether the model can predict a genuinely new geographic area.
+
+## Logistic Regression
+
+Different outcomes require different models:
+
+| Outcome | Model | Prediction |
+|---|---|---|
+| Continuous value | OLS | A number, such as dollars |
+| Count | Poisson regression | An expected count |
+| Binary 0/1 | Logistic regression | A probability |
+
+OLS is not appropriate for a binary outcome because it can predict values below
+zero or above one. Logistic regression transforms probability into log-odds,
+which can take any value.
+
+The odds of an event are:
+
+$$
+\text{Odds} = \frac{p}{1-p}
+$$
+
+For example, a probability of 0.80 produces odds of 4, meaning the event is
+four times as likely to happen as not happen.
+
+The logit link converts probability into log-odds:
+
+$$
+\log\left(\frac{p}{1-p}\right)
+$$
+
+The inverse link, called the sigmoid function, converts the model score back
+into a probability:
+
+$$
+p = \frac{1}{1+e^{-z}}
+$$
+
+This creates an S-shaped curve and guarantees that predicted probabilities
+remain between zero and one.
+
+## Interpreting Logistic Regression
+
+A logistic regression coefficient describes a change in log-odds. Exponentiating
+the coefficient produces an **odds ratio**:
+
+```r
+exp(coef(model))
+```
+
+An odds ratio of:
+
+- `1` means no association.
+- More than `1` means higher odds.
+- Less than `1` means lower odds.
+
+For example, an odds ratio of `1.17` means that a one-unit increase in the
+predictor is associated with 17% higher odds.
+
+The change in odds is constant, but the change in probability depends on where
+someone is located on the S-curve.
+
+## Thresholds and Decisions
+
+A logistic model produces a probability. A threshold converts that probability
+into a classification:
+
+```r
+predicted <- as.integer(probability >= 0.5)
+```
+
+Lowering the threshold flags more cases and generally increases sensitivity,
+but it also creates more false positives. Raising the threshold flags fewer
+cases and generally increases specificity, but it creates more false negatives.
+
+The threshold is a policy decision. The appropriate threshold depends on the
+consequences of each type of mistake.
+
+## Confusion Matrix
+
+| | Actual 1 | Actual 0 |
+|---|---|---|
+| Predicted 1 | True positive | False positive |
+| Predicted 0 | False negative | True negative |
+
+The main classification measurements are:
+
+$$
+\text{Sensitivity} = \frac{TP}{TP+FN}
+$$
+
+$$
+\text{Specificity} = \frac{TN}{TN+FP}
+$$
+
+$$
+\text{Precision} = \frac{TP}{TP+FP}
+$$
+
+$$
+\text{Accuracy} = \frac{TP+TN}{TP+FP+FN+TN}
+$$
+
+Accuracy alone can be misleading because it does not show which kinds of
+mistakes the model makes.
+
+## Proving R Works
+
+This example fits a logistic regression predicting rearrest using age and the
+number of prior records.
+
+```{r}
+library(tidyverse)
+
+recid_data <- tibble(
+  age = c(19, 22, 25, 28, 31, 35, 38, 42, 45, 50, 55, 60),
+  priors = c(0, 3, 1, 5, 2, 4, 0, 6, 2, 3, 1, 5),
+  rearrested = c(1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1)
+)
+
+recid_model <- glm(
+  rearrested ~ age + priors,
+  family = binomial,
+  data = recid_data
+)
+
+summary(recid_model)
+```
+
+The model coefficients are on the log-odds scale. We can convert them into odds
+ratios:
+
+```{r}
+exp(coef(recid_model))
+```
+
+We can then calculate predicted probabilities and classifications:
+
+```{r}
+recid_results <- recid_data %>%
+  mutate(
+    probability = predict(recid_model, type = "response"),
+    predicted_50 = as.integer(probability >= 0.5)
+  )
+
+recid_results
+```
+
+The confusion matrix compares the classifications with the actual outcomes:
+
+```{r}
+table(
+  predicted = recid_results$predicted_50,
+  actual = recid_results$rearrested
+)
+```
+
+Using `type = "response"` is important because it returns probabilities.
+Without it, `predict()` returns log-odds.
+
+## Reflection
+
+I learned that evaluating a spatial model with random folds can produce
+overly optimistic results because nearby training and testing observations may
+be very similar. Geographic cross-validation provides a harder but more honest
+test of whether the model can work in a new area.
+
+I also learned that a logistic model only produces probabilities. Turning those
+probabilities into decisions requires selecting a threshold. That choice should
+depend on the real consequences of false positives and false negatives, not
+only on which threshold produces the highest accuracy.
+
+## Questions I Still Have
+
+- How should geographic groups be chosen for cross-validation?
+- When is accuracy an inappropriate classification metric?
+- Who should be responsible for selecting a decision threshold?

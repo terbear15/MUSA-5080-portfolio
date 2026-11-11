@@ -158,7 +158,7 @@
     "href": "weekly-notes/index.html",
     "title": "Weekly Notes",
     "section": "",
-    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 9: Predictive Policing, Counts, and Dirty Data\n\n\nUsing fishnets and Poisson regression while questioning what police records actually measure.\n\n\n\n\n\nOct 30, 2026\n\n\n\n\n\n\n\nWeek 8: LISA and Spatial Feature Engineering\n\n\nFinding where model errors cluster and creating spatial features to improve predictions.\n\n\n\n\n\nOct 23, 2026\n\n\n\n\n\n\n\nWeek 7: Spatial Autocorrelation in Model Errors\n\n\nUsing residual maps and Moran’s I to find spatial patterns that a prediction model misses.\n\n\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\nWeek 6: Transformations, Categories, Interactions, & Fixed Effects\n\n\nChanging the shape of predictors and testing whether those changes improve prediction.\n\n\n\n\n\nOct 9, 2026\n\n\n\n\n\n\n\nWeek 5: Linear Regression for Prediction\n\n\nBuilding rent models, checking residuals, and testing predictions with cross-validation.\n\n\n\n\n\nSep 25, 2026\n\n\n\n\n\n\n\nWeek 4: Spatial Data, Joins, & Coordinate Systems\n\n\nConnecting Census data to maps and measuring spatial relationships.\n\n\n\n\n\nSep 18, 2026\n\n\n\n\n\n\n\nWeek 3: Visualization, Geoms, & ggplot2\n\n\nBuilding graphs and showing uncertainty in Census data.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
+    "text": "Notes from each week of MUSA 5080. New entries appear here automatically — add a .qmd file to this folder and render.\n\n\n\n\n\n\n\n\n\n\n\nWeek 10: Geographic Cross-Validation and Logistic Regression\n\n\nPredicting binary outcomes and turning probabilities into policy decisions.\n\n\n\n\n\nNov 6, 2026\n\n\n\n\n\n\n\nWeek 9: Predictive Policing, Counts, and Dirty Data\n\n\nUsing fishnets and Poisson regression while questioning what police records actually measure.\n\n\n\n\n\nOct 30, 2026\n\n\n\n\n\n\n\nWeek 8: LISA and Spatial Feature Engineering\n\n\nFinding where model errors cluster and creating spatial features to improve predictions.\n\n\n\n\n\nOct 23, 2026\n\n\n\n\n\n\n\nWeek 7: Spatial Autocorrelation in Model Errors\n\n\nUsing residual maps and Moran’s I to find spatial patterns that a prediction model misses.\n\n\n\n\n\nOct 16, 2026\n\n\n\n\n\n\n\nWeek 6: Transformations, Categories, Interactions, & Fixed Effects\n\n\nChanging the shape of predictors and testing whether those changes improve prediction.\n\n\n\n\n\nOct 9, 2026\n\n\n\n\n\n\n\nWeek 5: Linear Regression for Prediction\n\n\nBuilding rent models, checking residuals, and testing predictions with cross-validation.\n\n\n\n\n\nSep 25, 2026\n\n\n\n\n\n\n\nWeek 4: Spatial Data, Joins, & Coordinate Systems\n\n\nConnecting Census data to maps and measuring spatial relationships.\n\n\n\n\n\nSep 18, 2026\n\n\n\n\n\n\n\nWeek 3: Visualization, Geoms, & ggplot2\n\n\nBuilding graphs and showing uncertainty in Census data.\n\n\n\n\n\nSep 11, 2026\n\n\n\n\n\n\n\nWeek 2: dplyr and Census\n\n\nTable Functions and ACS Data\n\n\n\n\n\nSep 4, 2026\n\n\n\n\n\n\n\nWeek 1: Getting Set Up\n\n\nFirst impressions, and getting the workflow running.\n\n\n\n\n\nAug 28, 2026\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "weekly-notes/week-02.html",
@@ -817,5 +817,75 @@
     "title": "Week 9: Predictive Policing, Counts, and Dirty Data",
     "section": "Questions I Still Have",
     "text": "Questions I Still Have\n\nHow much overdispersion is enough to require negative binomial regression?\nHow should the fishnet cell size be selected?\nHow can a model be evaluated when the true amount of crime is not completely observed?"
+  },
+  {
+    "objectID": "weekly-notes/week-10.html",
+    "href": "weekly-notes/week-10.html",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "",
+    "text": "We learned how geographic cross-validation provides a more realistic test for spatial models. We then introduced logistic regression for outcomes with two possibilities, such as whether a person is rearrested within two years.\nWe converted probabilities into odds and log-odds, interpreted odds ratios, and used classification thresholds to turn predicted probabilities into yes-or-no decisions."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#what-we-did",
+    "href": "weekly-notes/week-10.html#what-we-did",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "",
+    "text": "We learned how geographic cross-validation provides a more realistic test for spatial models. We then introduced logistic regression for outcomes with two possibilities, such as whether a person is rearrested within two years.\nWe converted probabilities into odds and log-odds, interpreted odds ratios, and used classification thresholds to turn predicted probabilities into yes-or-no decisions."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#geographic-cross-validation",
+    "href": "weekly-notes/week-10.html#geographic-cross-validation",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Geographic Cross-Validation",
+    "text": "Geographic Cross-Validation\nRandom cross-validation may place nearby observations in both the training and testing sets. Because nearby places often have similar features and outcomes, the model may have effectively seen the answer next door. This is called proximity leakage.\nGeographic cross-validation holds out an entire area, such as one police district:\n\nTrain the model on every other district.\nPredict the held-out district.\nCalculate the prediction error.\nRepeat for each district.\n\nThis tests whether the model can predict a genuinely new geographic area."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#logistic-regression",
+    "href": "weekly-notes/week-10.html#logistic-regression",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Logistic Regression",
+    "text": "Logistic Regression\nDifferent outcomes require different models:\n\n\n\nOutcome\nModel\nPrediction\n\n\n\n\nContinuous value\nOLS\nA number, such as dollars\n\n\nCount\nPoisson regression\nAn expected count\n\n\nBinary 0/1\nLogistic regression\nA probability\n\n\n\nOLS is not appropriate for a binary outcome because it can predict values below zero or above one. Logistic regression transforms probability into log-odds, which can take any value.\nThe odds of an event are:\n\\[\n\\text{Odds} = \\frac{p}{1-p}\n\\]\nFor example, a probability of 0.80 produces odds of 4, meaning the event is four times as likely to happen as not happen.\nThe logit link converts probability into log-odds:\n\\[\n\\log\\left(\\frac{p}{1-p}\\right)\n\\]\nThe inverse link, called the sigmoid function, converts the model score back into a probability:\n\\[\np = \\frac{1}{1+e^{-z}}\n\\]\nThis creates an S-shaped curve and guarantees that predicted probabilities remain between zero and one."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#interpreting-logistic-regression",
+    "href": "weekly-notes/week-10.html#interpreting-logistic-regression",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Interpreting Logistic Regression",
+    "text": "Interpreting Logistic Regression\nA logistic regression coefficient describes a change in log-odds. Exponentiating the coefficient produces an odds ratio:\nexp(coef(model))\nAn odds ratio of:\n\n1 means no association.\nMore than 1 means higher odds.\nLess than 1 means lower odds.\n\nFor example, an odds ratio of 1.17 means that a one-unit increase in the predictor is associated with 17% higher odds.\nThe change in odds is constant, but the change in probability depends on where someone is located on the S-curve."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#thresholds-and-decisions",
+    "href": "weekly-notes/week-10.html#thresholds-and-decisions",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Thresholds and Decisions",
+    "text": "Thresholds and Decisions\nA logistic model produces a probability. A threshold converts that probability into a classification:\npredicted &lt;- as.integer(probability &gt;= 0.5)\nLowering the threshold flags more cases and generally increases sensitivity, but it also creates more false positives. Raising the threshold flags fewer cases and generally increases specificity, but it creates more false negatives.\nThe threshold is a policy decision. The appropriate threshold depends on the consequences of each type of mistake."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#confusion-matrix",
+    "href": "weekly-notes/week-10.html#confusion-matrix",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Confusion Matrix",
+    "text": "Confusion Matrix\n\n\n\n\nActual 1\nActual 0\n\n\n\n\nPredicted 1\nTrue positive\nFalse positive\n\n\nPredicted 0\nFalse negative\nTrue negative\n\n\n\nThe main classification measurements are:\n\\[\n\\text{Sensitivity} = \\frac{TP}{TP+FN}\n\\]\n\\[\n\\text{Specificity} = \\frac{TN}{TN+FP}\n\\]\n\\[\n\\text{Precision} = \\frac{TP}{TP+FP}\n\\]\n\\[\n\\text{Accuracy} = \\frac{TP+TN}{TP+FP+FN+TN}\n\\]\nAccuracy alone can be misleading because it does not show which kinds of mistakes the model makes."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#proving-r-works",
+    "href": "weekly-notes/week-10.html#proving-r-works",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Proving R Works",
+    "text": "Proving R Works\nThis example fits a logistic regression predicting rearrest using age and the number of prior records.\n\nlibrary(tidyverse)\n\nrecid_data &lt;- tibble(\n  age = c(19, 22, 25, 28, 31, 35, 38, 42, 45, 50, 55, 60),\n  priors = c(0, 3, 1, 5, 2, 4, 0, 6, 2, 3, 1, 5),\n  rearrested = c(1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1)\n)\n\nrecid_model &lt;- glm(\n  rearrested ~ age + priors,\n  family = binomial,\n  data = recid_data\n)\n\nsummary(recid_model)\n\n\nCall:\nglm(formula = rearrested ~ age + priors, family = binomial, data = recid_data)\n\nCoefficients:\n            Estimate Std. Error z value Pr(&gt;|z|)\n(Intercept)   2.4397     3.1881   0.765    0.444\nage          -0.1918     0.1486  -1.290    0.197\npriors        1.8910     1.3072   1.447    0.148\n\n(Dispersion parameter for binomial family taken to be 1)\n\n    Null deviance: 16.6355  on 11  degrees of freedom\nResidual deviance:  7.3526  on  9  degrees of freedom\nAIC: 13.353\n\nNumber of Fisher Scoring iterations: 7\n\n\nThe model coefficients are on the log-odds scale. We can convert them into odds ratios:\n\nexp(coef(recid_model))\n\n(Intercept)         age      priors \n 11.4691240   0.8255084   6.6257746 \n\n\nWe can then calculate predicted probabilities and classifications:\n\nrecid_results &lt;- recid_data %&gt;%\n  mutate(\n    probability = predict(recid_model, type = \"response\"),\n    predicted_50 = as.integer(probability &gt;= 0.5)\n  )\n\nrecid_results\n\n# A tibble: 12 × 5\n     age priors rearrested probability predicted_50\n   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;        &lt;int&gt;\n 1    19      0          1     0.231              0\n 2    22      3          1     0.980              1\n 3    25      1          0     0.386              0\n 4    28      5          1     0.999              1\n 5    31      2          0     0.569              1\n 6    35      4          1     0.964              1\n 7    38      0          0     0.00779            0\n 8    42      6          1     0.997              1\n 9    45      2          0     0.0826             0\n10    50      3          0     0.186              0\n11    55      1          0     0.00199            0\n12    60      5          1     0.596              1\n\n\nThe confusion matrix compares the classifications with the actual outcomes:\n\ntable(\n  predicted = recid_results$predicted_50,\n  actual = recid_results$rearrested\n)\n\n         actual\npredicted 0 1\n        0 5 1\n        1 1 5\n\n\nUsing type = \"response\" is important because it returns probabilities. Without it, predict() returns log-odds."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#reflection",
+    "href": "weekly-notes/week-10.html#reflection",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Reflection",
+    "text": "Reflection\nI learned that evaluating a spatial model with random folds can produce overly optimistic results because nearby training and testing observations may be very similar. Geographic cross-validation provides a harder but more honest test of whether the model can work in a new area.\nI also learned that a logistic model only produces probabilities. Turning those probabilities into decisions requires selecting a threshold. That choice should depend on the real consequences of false positives and false negatives, not only on which threshold produces the highest accuracy."
+  },
+  {
+    "objectID": "weekly-notes/week-10.html#questions-i-still-have",
+    "href": "weekly-notes/week-10.html#questions-i-still-have",
+    "title": "Week 10: Geographic Cross-Validation and Logistic Regression",
+    "section": "Questions I Still Have",
+    "text": "Questions I Still Have\n\nHow should geographic groups be chosen for cross-validation?\nWhen is accuracy an inappropriate classification metric?\nWho should be responsible for selecting a decision threshold?"
   }
 ]
