@@ -1,5 +1,8 @@
 project:
   type: website
+  render:
+    - '*.qmd'
+    - '!data/assignment5/assign5_template.qmd'
   output-dir: docs
   execute-dir: project
 
