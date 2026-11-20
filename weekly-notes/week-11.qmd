@@ -1,0 +1,78 @@
+---
+title: "Week 11: Is the Model Race-Blind?"
+description: "Using confusion matrices and ROC curves to evaluate rearrest predictions and compare errors across groups."
+date: 2026-11-13
+---
+
+## What We Did
+
+We used the Broward County data from ProPublica’s COMPAS investigation to ask whether leaving race out of a model leads to similar errors for Black and white defendants. After applying the lab’s screening, offense, and score filters, 6,172 people remained. About 45.5% had a recorded rearrest within two years.
+
+Our logistic regression used age, prior arrests, sex, felony charge status, and total juvenile offenses. Holding the other predictors fixed, one additional prior arrest was associated with 17% higher odds of rearrest. We used the fitted probabilities to see how the choice of cutoff changed who was flagged.
+
+## Key Concepts
+
+| Concept | Question it answers |
+|---|---|
+| Odds ratio | How do the odds change when one predictor increases by one unit? |
+| Sensitivity | Among people who were rearrested, how many did the model flag? |
+| Specificity | Among people without a rearrest, how many went unflagged? |
+| Calibration | Among people given similar probabilities, how often did the outcome occur? |
+
+## Choosing a Cutoff
+
+| Cutoff | Share of rearrested people flagged (sensitivity) | Share of people without a rearrest left unflagged (specificity) |
+|---|---:|---:|
+| 0.30 | 90% | 31% |
+| 0.50 | 55% | 79% |
+| 0.70 | 20% | 96% |
+
+At 0.50, the model flagged 1,551 people who were subsequently rearrested and 713 who were not. Raising the cutoff to 0.70 reduced false alarms, but it also left four out of five people who were later rearrested below the cutoff.
+
+The ROC curve compares the true positive rate with the false positive rate across cutoffs. Our model had an AUC of 0.73, compared with 0.71 for the COMPAS decile score. We fitted and evaluated our model on the same records, so that comparison describes ranking performance within this sample.
+
+## Who Gets the Errors?
+
+At 0.50, accuracy rounded to 68% for both groups. Breaking down the mistakes revealed a difference that the accuracy figure hid.
+
+| Group | False positive rate | False negative rate |
+|---|---:|---:|
+| Black defendants | 29% | 34% |
+| White defendants | 14% | 60% |
+
+Among people without a recorded rearrest, Black defendants were about twice as likely to be flagged. Among those who were rearrested, white defendants were more likely to have been missed.
+
+Two model inputs differed across groups. Black defendants averaged 4.2 prior arrests and 32 years of age, while white defendants averaged 2.3 priors and 38 years. Recorded arrests can reflect policing patterns as well as behavior. Adding an indicator for Black defendants kept the rounded AUC at 0.73 and widened the false positive rate gap from 15 to 21 percentage points.
+
+## Calibration
+
+The calibration exercise asked a different question. Among people assigned probabilities from 40% to just under 50%, the observed rearrest rates were 44% for Black defendants and 42% for white defendants. People in that score range had similar outcomes across groups, even though the 0.50 cutoff produced different error rates overall.
+
+## Proving R Works
+
+I used the four counts from the lab’s confusion matrix to reproduce its checkpoint at the 0.50 cutoff.
+
+```{r}
+tp <- 1551
+fp <- 713
+fn <- 1258
+tn <- 2650
+
+round(c(
+  sensitivity = tp / (tp + fn),
+  specificity = tn / (tn + fp),
+  accuracy = (tp + tn) / (tp + fp + fn + tn)
+), 2)
+```
+
+The difference between sensitivity (0.55) and specificity (0.79) tells me which outcomes the model identified more reliably at this cutoff.
+
+## Reflection
+
+I would have missed the largest difference between groups if I had stopped at 68% accuracy. For every 100 Black defendants who had no recorded rearrest, about 29 were still flagged. For every 100 white defendants with the same outcome, about 14 were flagged. Comparing those two groups helped me understand why the denominator matters when someone describes a model as accurate.
+
+## Questions I Still Have
+
+- Would the gap in false positive rates persist in another county or release year?
+- How many people were in each probability bin, and how much uncertainty is there in the calibration comparison?
+- How much of the difference in prior arrest counts reflects differences in police contact?
