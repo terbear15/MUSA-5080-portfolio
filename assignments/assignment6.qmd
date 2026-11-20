@@ -2,7 +2,7 @@
 title: "Assignment 6: Parole Reform"
 subtitle: "MUSA 5080 · Fall 2026"
 author: "Terry Boxuan Xu"
-date: 11/13/2026
+date: 2026-11-19
 format:
   html:
     code-fold: show

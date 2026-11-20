@@ -2,7 +2,7 @@
 title: "Assignment 5: House Price Prediction, Chicago"
 subtitle: "MUSA 5080 · Team Mahjong · North/South model"
 author: "Team Mahjong: Chenyan Zhao, Peirong Luo, Terry Xu, Xuanyu Zhou"
-date: last-modified
+date: 2026-10-30
 format:
   html:
     toc: true
